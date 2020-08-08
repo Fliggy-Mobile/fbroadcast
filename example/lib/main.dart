@@ -40,9 +40,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    FBroadcast.instance().register(Key_StopCount, () {
+    FBroadcast.instance().register(Key_StopCount, (_) {
       runAddCount?.cancel();
-      print('STOP!');
       setState(() {
         text = "STOP!";
       });
@@ -63,12 +62,12 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            alignment: Alignment.center,
-            child: FButton(
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            FButton(
               padding: EdgeInsets.only(
                   left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
               text: text,
@@ -77,7 +76,7 @@ class _HomePageState extends State<HomePage> {
               isSupportNeumorphism: true,
               corner: FCorner.all(6.0),
               onPressed: () {
-                FBroadcast.instance().stickyBroadcast(Key_MsgCount, ++msgCount);
+                FBroadcast.instance().stickyBroadcast(Key_MsgCount, value:++msgCount);
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
                     return PageDemo1();
@@ -89,8 +88,30 @@ class _HomePageState extends State<HomePage> {
                 });
               },
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            FButton(
+              padding: EdgeInsets.only(
+                  left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
+              text: text,
+              style: TextStyle(color: mainTextNormalColor),
+              color: mainBackgroundColor,
+              isSupportNeumorphism: true,
+              corner: FCorner.all(6.0),
+              onPressed: () {
+                FBroadcast.instance().stickyBroadcast(Key_MsgCount, value:++msgCount);
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) {
+                    return PageDemo1();
+                  },
+                ));
+                addCount();
+                setState(() {
+                  text = "Run Count And Goto Next";
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +121,7 @@ class _HomePageState extends State<HomePage> {
 
   addCount() {
     runAddCount = Timer(Duration(milliseconds: 1000), () {
-      FBroadcast.instance().broadcast(Key_MsgCount, ++msgCount);
+      FBroadcast.instance().broadcast(Key_MsgCount, value:++msgCount);
       addCount();
     });
   }
