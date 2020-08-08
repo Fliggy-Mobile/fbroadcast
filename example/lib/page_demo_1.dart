@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:fbroadcast/fbroadcast.dart';
 import 'package:fbroadcast_example/broadcast_keys.dart';
+import 'package:fbroadcast_example/user.dart';
 import 'package:fbutton/fbutton.dart';
 import 'package:fcommon/fcommon.dart';
 import 'package:flutter/material.dart';
@@ -83,6 +84,14 @@ class PageDemo1 extends StatelessWidget {
                                       data["color"] = value;
                                     });
                                   },
+                                  more: {
+                                    Key_User: (value) {
+                                      print(
+                                          'user = ${FBroadcast.value<User>(Key_User).name}');
+                                      print(
+                                          'user = ${FBroadcast.value<User>(Key_User).info}');
+                                    }
+                                  },
                                   context: data,
                                 );
                               },
@@ -90,7 +99,9 @@ class PageDemo1 extends StatelessWidget {
                                 return FSuper(
                                   width: 200,
                                   height: 100,
-                                  backgroundColor: data["color"],
+                                  backgroundColor:
+                                      FBroadcast.value(Key_Color) ??
+                                          mainBackgroundColor,
                                   corner: FCorner.all(6.0),
                                 );
                               },
@@ -113,6 +124,13 @@ class PageDemo1 extends StatelessWidget {
                           height: 100,
                           backgroundColor: mainBackgroundColor,
                           corner: FCorner.all(6.0),
+                          onClick: () {
+                            FBroadcast.instance().broadcast(Key_User,
+                                value: User()
+                                  ..name = "FWidget"
+                                  ..info =
+                                      "Seriously provide exquisite widget to help you build exquisite application.");
+                          },
                         ),
                         const SizedBox(height: 16),
                         FSuper(

@@ -30,6 +30,19 @@ class FBroadcast {
     return _instance;
   }
 
+  /// 接收者可以通过该函数获取消息中的数据
+  ///
+  /// This function allows the receiver to get the data in the message
+  static T value<T>(String key){
+    if (_textIsEmpty(key)) return null;
+    var value = instance()._map[key]?.value;
+    if (value == null) return null;
+    if (!(value is T)) {
+      debugPrintStack(label: 'Error: value type [${value.runtimeType}] is not [$T]');
+    }
+    return value;
+  }
+
   _Notifier _get(String key) {
     if (_textIsEmpty(key)) throw Exception("The key can't be null or empty!");
     if (!_map.containsKey(key)) {
@@ -43,14 +56,6 @@ class FBroadcast {
       _receiverCache[context] = [];
     }
     return _receiverCache[context];
-  }
-
-  /// 接收者可以通过该函数获取消息中的数据
-  ///
-  /// This function allows the receiver to get the data in the message
-  dynamic value(String key) {
-    if (_textIsEmpty(key)) return null;
-    return _map[key]?.value;
   }
 
   /// 广播一条 [key] 类型的消息。
@@ -71,17 +76,22 @@ class FBroadcast {
     if (persistence && !_get(key).persistence) {
       _get(key).persistence = true;
     }
+//    if (value == null || _get(key).value == value) {
+//      /// 为了避免在返回上一页面时，tree 还没解锁就调用 setState
+//      ///
+//      /// To avoid calling setState before the tree is unlocked when returning to the previous page
+//      Timer(Duration(milliseconds: 0), () {
+//        _get(key).notifyListeners();
+//      });
+//    } else {
+//      Timer(Duration(milliseconds: 0), () {
+//        _get(key).value = value;
+//      });
+//    }
     if (value == null || _get(key).value == value) {
-      /// 为了避免在返回上一页面时，tree 还没解锁就调用 setState
-      ///
-      /// To avoid calling setState before the tree is unlocked when returning to the previous page
-      Timer(Duration(milliseconds: 0), () {
-        _get(key).notifyListeners();
-      });
+      _get(key).notifyListeners();
     } else {
-      Timer(Duration(milliseconds: 0), () {
-        _get(key).value = value;
-      });
+      _get(key).value = value;
     }
   }
 
@@ -136,7 +146,7 @@ class FBroadcast {
     Object context,
     Map<String, ValueCallback> more,
   }) {
-    if (!_textIsEmpty(key) && receiver != null){
+    if (!_textIsEmpty(key) && receiver != null) {
       _get(key).addListener(receiver);
       if (context != null && !_getReceivers(context).contains(receiver)) {
         _receiverCache[context].add(receiver);
@@ -276,13 +286,13 @@ class FBroadcast {
     _receiverCache.clear();
     _stickyMap.clear();
   }
-
-  bool _textIsEmpty(String text) {
-    return text == null || text.length == 0;
-  }
 }
 
 /// --------------------------------------------------------------------------------
+bool _textIsEmpty(String text) {
+  return text == null || text.length == 0;
+}
+
 typedef ValueCallback<T> = void Function(T value);
 
 class _Notifier<T> {

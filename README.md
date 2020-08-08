@@ -48,7 +48,7 @@
 
 </div>
 
-![](https://gw.alicdn.com/tfs/TB1fsXYij39YK4jSZPcXXXrUFXa-1024-602.png)
+![](https://gw.alicdn.com/tfs/TB1CGaHQQY2gK0jSZFgXXc5OFXa-1560-692.png)
 
 **[English](https://github.com/Fliggy-Mobile/fbroadcast) | 简体中文**
 
@@ -170,7 +170,7 @@ FBroadcast.instance().broadcast(
 );
 ```
 
-当开发者将一个消息类型持久化后，就可以在任意位置，通过 `FBroadcast.instance().value(String key)` 来获取广播系统中该类型消息的最新的数据。而更新广播系统中的数据只需要通过 `broadcast()` 即可完成。
+当开发者将一个消息类型持久化后，就可以在任意位置，通过 `FBroadcast.value(String key)` 来获取广播系统中该类型消息的最新的数据。而更新广播系统中的数据只需要通过 `broadcast()` 即可完成。
 
 > ⚠️注意，一个消息类型一旦持久化就只能通过 `FBroadcast.instance().clear(String key)` 来从广播系统中移除该类型的消息。
 
@@ -320,7 +320,7 @@ void stickyBroadcast(String key, {dynamic value, bool persistence})
 /// 接收者可以通过该函数获取消息中的数据
 ///
 /// This function allows the receiver to get the data in the message
-dynamic value(String key)
+static T value<T>(String key)
 ```
 
 ### 移除指定接收者

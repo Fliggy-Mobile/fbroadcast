@@ -6,3 +6,5 @@ String Key_MsgCount = "Key_MsgCount";
 String Key_StopCount = "Key_StopCount";
 
 String Key_Color = "Key_Color";
+
+String Key_User = "Key_User";
