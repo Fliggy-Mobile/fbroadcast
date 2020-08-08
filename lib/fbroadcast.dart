@@ -193,7 +193,7 @@ class FBroadcast {
     _stickyMap.remove(key);
   }
 
-  /// 移除广播系统中的所有的接收者，以及粘性广播。
+  /// 会移除广播系统中的所有的接收者，以及粘性广播。
   ///
   /// Remove all receivers in the broadcasting system, and sticky broadcasting.
   void dispose() {
