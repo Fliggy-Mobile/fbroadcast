@@ -255,7 +255,7 @@ FBroadcast.instance().unregister(this);
 
 > **场景**：点击 **Start**，Runner 开始 Run，显示屏需要实时更新运动员的状态。
 
-
+![](https://gw.alicdn.com/tfs/TB1ZgoHg_M11u4jSZPxXXahcXXa-1280-869.gif)
 
 #### 1. 创建 Runner: 
 ```dart
@@ -327,13 +327,13 @@ Column(
 )
 ```
 
-在上面的例子中，通过 **FBroadcast** 简单清晰的实现了 Runner 和 UI 之间的通信。
+在上面的示例中，通过 **FBroadcast** 简单清晰的实现了 Runner 和 UI 之间的通信。
   
-1. 点击 Start 按钮，通过 **FBroadcast** 发送起跑消息给 Runner；
+> 1. 点击 Start 按钮，通过 **FBroadcast** 发送起跑消息给 Runner；
 
-2. Runner 收到消息后，开始 Run，同时不断通过 **FBroadcast** 发出 Running info；
+> 2. Runner 收到消息后，开始 Run，同时不断通过 **FBroadcast** 发出 Running info；
 
-3. UI 由于注册了接收器，在接收到 Running info 时，通过 `FBroadcast.value()` 获取消息数据，自动更新视图。
+> 3. UI 由于注册了接收器，在接收到 Running info 时，通过 `FBroadcast.value()` 获取消息数据，自动更新视图。
 
 整个过程中，Runner 和 UI 之间是**完全解耦**的，且 UI 只需在 `init` 中**注册接收器**（receiver 中调用 `setState((){})`），就能根据消息数据的变化，自动实时的更新视图，而无需开发者关心整个过程。
 
@@ -341,10 +341,279 @@ Column(
 ### 局部状态管理
 
 
+> **场景**：点击改变UI颜色
+
+![](https://gw.alicdn.com/tfs/TB1jDjHQUY1gK0jSZFCXXcwqXXa-1280-869.gif)
+
+#### 1. 点击发出事件
+
+```dart
+FButton(
+  text: "Change Color",
+  ...
+  onPressed: () {
+    /// send change color message
+    FBroadcast.instance().broadcast(Key_Color, value: reduceColor());
+  },
+)
+```
+
+#### 2. UI 注册接收器
+
+```dart
+Stateful(
+  /// init
+  initState: (setState, data) {
+    /// register
+    FBroadcast.instance().register(
+      Key_Color,
+      (value) {
+        /// refresh ui
+        setState(() {
+        });
+      },
+      /// bind context
+      context: data,
+    );
+  },
+  builder: (context, setState, data) {
+    return FSuper(
+      ...
+      /// get color value
+      backgroundColor: FBroadcast.value<Color>(Key_Color) ?? mainBackgroundColor,
+    );
+  },
+)
+```
+
+通过 **FBroadcast** 可以很轻易的完成 UI 交互之间的局部状态更新。上面的示例展示了颜色的变更，数据对象只有一个参数，实际开发过程中，开发者可以根据需要将通信的数据对象进行丰富扩展。
+
+开发者只需要在需要更新 UI 的 Widget 中**注册接收器**，调用一次 `setState((){})`，在交互点发出消息。而不用去主动的将触发逻辑和 `setState((){})` 在所有的交互点都写一次。
+
 
 ### 全局状态管理
 
+> **场景**：点击头像跳转登陆页，当账号密码不为 null 时，登陆按钮才可以点击。点击登陆按钮发送登陆请求，登陆成功后，返回上一页，刷新用户信息。
 
+![](https://gw.alicdn.com/tfs/TB1kOvGQKH2gK0jSZJnXXaT1FXa-1280-869.gif)
+
+#### 1. 用户信息Widget注册接收器
+
+```dart
+class Avatar extends StatefulWidget {
+  @override
+  _AvatarState createState() => _AvatarState();
+}
+
+class _AvatarState extends State<Avatar> {
+  @override
+  void initState() {
+    super.initState();
+    FBroadcast.instance().register(
+      Key_MsgCount,
+      /// register Key_MsgCount reviver
+      (value) => setState(() {}),
+      more: {
+        /// register Key_User reviver
+        Key_User: (value) => setState(() {}),
+      },
+      /// bind context
+      context: this,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// get value from FBroadcast
+    User user = FBroadcast.value<User>(Key_User);
+    int msgCount = FBroadcast.value(Key_MsgCount) ?? 0;
+    return FSuper(
+      ...
+      backgroundImage: (user == null || _textIsEmpty(user.avatar)) ? null : AssetImage(user.avatar),
+      redPoint: user != null && msgCount > 0,
+      redPointText: msgCount.toString(),
+      text: user != null ? null : "Click Login",
+      onClick: user != null
+          ? null
+          : () => Navigator.push(context, MaterialPageRoute( builder: (context) => LoginPage())),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    /// remove all receivers from the environment
+    FBroadcast.instance().unregister(this);
+  }
+}
+```
+
+登陆页中注册 `Key_User` 接收器，当接收到登陆消息时，取出其中的数据，刷新UI。
+
+#### 2. 构建数据模型
+
+```dart
+class User{
+  String name;
+  String avatar;
+  int messageCount = 0;
+  String info;
+}
+```
+
+#### 3. 构建逻辑处理对象
+
+```dart
+class LoginHandler {
+  String _userName;
+  String _password;
+
+  /// set user name, check to see if login is allowed
+  set userName(String v) {
+    _userName = v;
+    if (_textNoEmpty(_userName) && _textNoEmpty(_password)) {
+      FBroadcast.instance().broadcast(Key_Login, value: true);
+    } else {
+      FBroadcast.instance().broadcast(Key_Login, value: false);
+    }
+  }
+
+  /// set user password, check to see if login is allowed
+  set password(String v) {
+    _password = v;
+    if (_textNoEmpty(_userName) && _textNoEmpty(_password)) {
+      FBroadcast.instance().broadcast(Key_Login, value: true);
+    } else {
+      FBroadcast.instance().broadcast(Key_Login, value: false);
+    }
+  }
+
+  /// login
+  void login() {
+    Timer(Duration(milliseconds: 1500), () {
+      /// login success，send login success message —— Key_User
+      FBroadcast.instance().broadcast(
+        Key_User,
+        value: User()
+          ..avatar = "assets/logo.png"
+          ..name = _userName
+          ..info =
+              "Seriously provide exquisite widget to help you build exquisite application.",
+        /// Persistence Key_User
+        persistence: true,
+      );
+    });
+  }
+}
+```
+
+将逻辑处理转移到 **LoginHandler** 中进行隔离，所有的处理结果都通过 **FBroadcast** 广播出去，使注册到广播系统中的对应接收器能够响应。
+
+#### 4. 登陆页
+
+```dart
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  /// Logic handler
+  LoginHandler handler = LoginHandler();
+  /// input controller
+  FSearchController _controller1 = FSearchController();
+  FSearchController _controller2 = FSearchController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller1.setListener(() {
+      /// update userName
+      handler.userName = _controller1.text;
+    });
+    _controller2.setListener(() {
+      /// update password
+      handler.password = _controller2.text;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return {
+      ...
+      /// userName input
+      FSearch(
+        controller: _controller1,
+        ...
+      ),
+      ...
+      /// userName input
+      FSearch(
+        controller: _controller2,
+        ...
+      ),
+      ...
+      Stateful(
+        initState: (setState, data) {
+          /// register login receiver
+          FBroadcast.instance().register(
+            Key_Login,
+            /// refresh ui
+            (value) => setState(() {}),
+            more: {
+              /// register user receiver
+              Key_User: (value) {
+                FLoading.hide();
+                Navigator.pop(context);
+              },
+            },
+            /// bind context
+            context: data,
+          );
+        }, 
+        builder: (context, setState, data) {
+          return FButton(
+            ...
+            text: "LOGIN",
+            /// Key_Login value=true is allowed to click login
+            onPressed: !(FBroadcast.value(Key_Login) ?? false)
+                ? null
+                : () {
+                    _controller1.clearFocus();
+                    _controller2.clearFocus();
+                    FLoading.show(context);
+                    /// Execute login logic
+                    handler.login();
+                  },
+          );
+      },),
+      ...
+    };
+  }
+}
+```
+
+注册接收器时，只需在接收回调中调用 `setState((){})`，后续所有的数据变化刷新，开发者就可以不用关注了。而给 UI 赋值可以方便的通过 **FBroadcast.value()** 获取对应数据来进行。
+
+> ⚠️注意，对于需要全局使用的状态/数据模型，它们对应的广播类型，在发送时，**需要至少有一次将 persistence** 设置为 **true**。上面示例中，就在登陆成功后，对 `Key_User` 类型的广播进行了持久化。
+
+```dart
+/// login success，send login success message —— Key_User
+FBroadcast.instance().broadcast(
+  Key_User,
+  value: User()
+    ..avatar = "assets/logo.png"
+    ..name = _userName
+    ..info =
+        "Seriously provide exquisite widget to help you build exquisite application.",
+  /// Persistence Key_User
+  persistence: true,
+);
+```
+
+上面的示例中展示了通过 **FBroadcast** 可以轻松快速的实现**消息传递**，进行 **局部、全局状态管理和刷新**，很好的将**各个模块，逻辑以及UI** 进行解耦。
+
+配合统一的**广播类型注册表**，开发者可以很轻易的借助 **IDEA** 的引用检索能力，随时查看所有广播的情况，对于不断迭代过程中的维护十分有益。
 
 ## Api 说明
 

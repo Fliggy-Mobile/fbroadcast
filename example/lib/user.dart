@@ -1,8 +1,7 @@
 
 class User{
   String name;
-  String userId;
   String avatar;
-  String messageCount;
+  int messageCount = 0;
   String info;
 }
