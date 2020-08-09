@@ -8,3 +8,8 @@ String Key_StopCount = "Key_StopCount";
 String Key_Color = "Key_Color";
 
 String Key_User = "Key_User";
+
+
+
+// ignore: non_constant_identifier_names
+String Key_RunnerState = "Key_RunnerState";

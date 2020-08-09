@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:fbroadcast_example/broadcast_keys.dart';
 import 'package:fbroadcast_example/page_demo_1.dart';
+import 'package:fbroadcast_example/page_demo_2.dart';
 import 'package:fbutton/fbutton.dart';
 import 'package:fcommon/fcommon.dart';
+import 'package:floading/floading.dart';
 import 'package:flutter/material.dart';
 import 'package:fbroadcast/fbroadcast.dart';
+import 'package:ftoast/ftoast.dart';
 
 void main() {
   runApp(MyApp());
@@ -68,46 +71,41 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             FButton(
-              padding: EdgeInsets.only(
-                  left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
-              text: text,
+              width: 200,
+              padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
+              alignment: Alignment.center,
+              text: "Demo1: Runner",
               style: TextStyle(color: mainTextNormalColor),
               color: mainBackgroundColor,
               isSupportNeumorphism: true,
               corner: FCorner.all(6.0),
               onPressed: () {
-                FBroadcast.instance().stickyBroadcast(Key_MsgCount, value:++msgCount);
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
                     return PageDemo1();
                   },
                 ));
-                addCount();
-                setState(() {
-                  text = "Run Count And Goto Next";
-                });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 90),
             FButton(
-              padding: EdgeInsets.only(
-                  left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
-              text: text,
+              width: 200,
+              padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
+              alignment: Alignment.center,
+              text: "Demo2: User",
               style: TextStyle(color: mainTextNormalColor),
               color: mainBackgroundColor,
               isSupportNeumorphism: true,
               corner: FCorner.all(6.0),
               onPressed: () {
-                FBroadcast.instance().stickyBroadcast(Key_MsgCount, value:++msgCount);
+                FBroadcast.instance()
+                    .stickyBroadcast(Key_MsgCount, value: ++msgCount);
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
-                    return PageDemo1();
+                    return PageDemo2();
                   },
                 ));
-                addCount();
-                setState(() {
-                  text = "Run Count And Goto Next";
-                });
+                addCount(context);
               },
             ),
           ],
@@ -119,10 +117,10 @@ class _HomePageState extends State<HomePage> {
   int msgCount = 0;
   Timer runAddCount;
 
-  addCount() {
+  addCount(BuildContext context) {
     runAddCount = Timer(Duration(milliseconds: 1000), () {
-      FBroadcast.instance().broadcast(Key_MsgCount, value:++msgCount);
-      addCount();
+      FBroadcast.instance().broadcast(Key_MsgCount, value: ++msgCount);
+      addCount(context);
     });
   }
 

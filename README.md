@@ -66,6 +66,8 @@
 
 - 不可思议的**粘性广播**
 
+- 易于构建简单明确的局部和全局状态管理
+
 # 🛠 使用指南
 
 **FBroadcast** 是一套高效灵活的**广播系统**，可以帮助开发者**轻松、有序**的构建具有极具复杂性的**关联交互**和**状态变化**的精美应用。
@@ -245,6 +247,104 @@ FBroadcast.instance().register(
 /// Remove all receivers from the environment
 FBroadcast.instance().unregister(this);
 ```
+
+## 使用示例
+
+
+### 消息传递
+
+> **场景**：点击 **Start**，Runner 开始 Run，显示屏需要实时更新运动员的状态。
+
+
+
+#### 1. 创建 Runner: 
+```dart
+/// Runner
+class Runner {
+  Runner() {
+    /// register
+    FBroadcast.instance().register(Key_RunnerState, (value) {
+      if (value is String && value.contains("Run")) {
+        /// receive start run message
+        FBroadcast.instance().broadcast(Key_RunnerState, value: "0m..");
+        run(20);
+      }
+    });
+  }
+
+  run(double distance) {
+    /// send running message
+    Timer(Duration(milliseconds: 500), () {
+      FBroadcast.instance().broadcast(Key_RunnerState, value: "${distance.toInt()}m..");
+      var newDistance = distance + 20;
+      if (newDistance > 100) {
+        FBroadcast.instance().broadcast(Key_RunnerState, value: "Win!\nTotal time is 2.5s");
+      } else {
+        run(newDistance);
+      }
+    });
+  }
+}
+```
+
+#### 2. 创建 UI:
+
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: <Widget>[
+    Stateful(
+      /// init
+      initState: (setState, data) {
+        FBroadcast.instance().register(
+          Key_RunnerState,
+          (value) {
+            /// refresh ui
+            setState(() {});
+          },
+          /// bind context
+          context: data,
+        );
+      },
+      builder: (context, setState, data) {
+        return FSuper(
+          ...
+          /// get running message
+          text: FBroadcast.value(Key_RunnerState) ?? "Preparing..",
+        );
+      },
+    ),
+    const SizedBox(height: 100),
+    FButton(
+      text: "Start"
+      ...
+      onPressed: () {
+        /// send start run message
+        FBroadcast.instance().broadcast(Key_RunnerState, value: "Running...");
+      },
+    ),
+  ],
+)
+```
+
+在上面的例子中，通过 **FBroadcast** 简单清晰的实现了 Runner 和 UI 之间的通信。
+  
+1. 点击 Start 按钮，通过 **FBroadcast** 发送起跑消息给 Runner；
+
+2. Runner 收到消息后，开始 Run，同时不断通过 **FBroadcast** 发出 Running info；
+
+3. UI 由于注册了接收器，在接收到 Running info 时，通过 `FBroadcast.value()` 获取消息数据，自动更新视图。
+
+整个过程中，Runner 和 UI 之间是**完全解耦**的，且 UI 只需在 `init` 中**注册接收器**（receiver 中调用 `setState((){})`），就能根据消息数据的变化，自动实时的更新视图，而无需开发者关心整个过程。
+
+
+### 局部状态管理
+
+
+
+### 全局状态管理
+
+
 
 ## Api 说明
 
