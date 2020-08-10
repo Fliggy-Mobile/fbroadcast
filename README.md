@@ -9,11 +9,11 @@
 
 <div align="center">
 
-<p>将复杂简单化，且易于管理。</p>
+<p>The complexity is simplified and easy to manage.</p>
 
-<p>FBroadcast 帮助开发者在应用内建立一套高效的广播系统，支持粘性广播。</p>
+<p>FBroadcast helps developer build an efficient broadcast system in the application and supports sticky broadcast.</p>
 
-<p><strong>主理人：<a href="">CoorChice</a>(<a href="coorchice.cb@alibaba-inc.com">coorchice.cb@alibaba-inc.com</a>)</strong></p>
+<p><strong>Author：<a href="">CoorChice</a>(<a href="coorchice.cb@alibaba-inc.com">coorchice.cb@alibaba-inc.com</a>)</strong></p>
 
 <p>
 
@@ -48,182 +48,150 @@
 
 </div>
 
-![](https://gw.alicdn.com/tfs/TB1CGaHQQY2gK0jSZFgXXc5OFXa-1560-692.png)
+![](https://gw.alicdn.com/tfs/TB1IjopQUT1gK0jSZFrXXcNCXXa-1560-840.png)
 
-**[English](https://github.com/Fliggy-Mobile/fbroadcast) | 简体中文**
+**English | [简体中文](https://github.com/Fliggy-Mobile/fbroadcast/blob/master/README_CN.md)**
 
-> 感觉还不错？请投出您的 **Star** 吧 🥰 ！
+> Like it? Please cast your **Star**  🥰 ！
 
-# ✨ 特性
+# ✨ Features
 
-来看看 **FBroadcast** 为开发者提供了那些不可思议的能力支持：
+Let’s take a look at **FBroadcast** that provides developer with incredible capabilities:
 
-- 支持**发送**和**接收**指定类型的消息
+- Support **send** and **receive** specified types of messages
 
-- 消息支持携带**任意类型**数据包
+- Message support to carry **any type** data packets
 
-- 提供**环境注册**，一行代码即可移除环境内所有接收者
+- Provided **Context Bind**, one line of code can remove all receivers in the context
 
-- 不可思议的**粘性广播**
+- Incredible **Sticky Broadcast**
 
-- 易于构建简单明确的局部和全局状态管理
+- Easy to build simple and clear local and global state management
 
-# 🛠 使用指南
+# 🛠 Guide
 
-**FBroadcast** 是一套高效灵活的**广播系统**，可以帮助开发者**轻松、有序**的构建具有极具复杂性的**关联交互**和**状态变化**的精美应用。
+**FBroadcast** is an efficient and flexible **Broadcasting System** that can help developer **easy and orderly** build **associated interaction** and **state changes** with great complexity、beautiful application.
 
 
 ![](https://gw.alicdn.com/tfs/TB1xVcSe9R26e4jSZFEXXbwuXXa-1456-528.png)
 
 
-**FBroadcast** 将为构建复杂的精美应用带来那些显而易见的改变呢？
+**FBroadcast** will bring those obvious changes to building complex and beautiful application?
 
-- **Widget/模块间的完全解耦**  
+- **Complete decoupling between Widget/Module** 
  
-    通过 **FBroadcast** 高效的广播系统，开发者可以轻易的完成**Widget/模块**的解耦。在应用构建的时候，经常需要 **Widget/模块A、B、C、..** 之间根据交互操作互相变更状态或数据，开发者们不得不为此让各个**Widget/模块互相依赖**或者为它们建立**统一的状态管理**，这能解决问题，但这让构建变得麻烦，也让变更变得难以进行。
+    Through the **FBroadcast** efficient broadcast system, developer can easily complete the decoupling of **Widget/Module**. When building an application, it is often necessary to change the state or data between **Widget/Modules A, B, C, ..** according to interactive operations. Developer have to make each **Widget/Module depend on each other for this purpose**, or create a **Unified State Manager** for them, which can solve the problem, but it makes the build cumbersome and also makes the change difficult.
     
-    **FBroadcast** 通过建立起**简单、有效、明确**广播系统，使得在任意**Widget/模块**中**任意时刻/位置**的改变能够主动发出广播，而需要根据这些变更作出**响应或更新视图**的**Widget/模块**只需要注册相应的**信息接收器**，就可以在变更发生时，接收到消息，作出响应。这使得关联模块间不再需要互相依赖，或是为它们设计建立统一的状态管理器。
+    **FBroadcast** has established a **simple, effective, and clear** broadcasting system, so that changes at any time/location in any **Widget/Module** can be actively broadcast, and it needs to be broadcast based on these. The **Widget/Module** that changes **response or updates the view** only needs to register the corresponding **information receiver**, and it can receive the message and respond when the change occurs. This makes the associated modules no longer need to depend on each other, or design and establish a unified state manager for them.
     
-    **十分简单，轻量，和易于变更**。当一个**Widget/模块**不在需要根据另一个**Widget/模块**的变更而更新时，只需移除其中的**接收器**即可，而不用为此而大改**依赖关系**或是**状态管理器**。
+    **Very simple, lightweight, and easy to change**. When a **Widget/Module** no longer needs to be updated according to the changes of another **Widget/Module**, just remove the **receiver** in it, instead of making major changes **Dependency** or **State Manager**.
 
 
-- **简单、灵活、明确、易管理**  
+- **Simple, flexible, clear and easy to manage** 
 
-    **FBroadcast**  为开发者提供了可以在任意时刻发送广播，和注册/移除接收器的能力，毫无约束和灵活。
+    **FBroadcast** provides developer with the ability to send broadcasts and register/remove receivers at any time, without restriction and flexibility.
     
-    广播和接收器之间通过明确的类型（字符串）来互相确认身份，指定类型的广播，只能被指定类型的接收器接收。
+    The broadcast and the receiver confirm each other's identities through a clear type (string), and the specified type of broadcast can only be received by the specified type of receiver.
     
-    **FBroadcast** 提供了环境注册支持，开发者可以在环境解构时，通过 [unregister()] 函数一次性移除环境中的所有类型接收器，而无需记忆和关心究竟需要移除那些接收器。例如，开发者可以在 **Widget** 的 `dispose()` 中，将注册在该 **Widget** 中的所有接收器一次性全部移除。
+    **FBroadcast** provides environment registration support. Developer can remove all types of receivers in the environment at one time through the [unregister()] function when the environment is deconstructed, without having to remember and care about which receivers need to be removed. . For example, the developer can remove all receivers registered in the **Widget** in the `dispose()` of **Widget**.
     
-    借助现代**IDEA**的能力，开发者可以为广播系统建立一张（或多张）统一的广播类型索引表，通过**IDEA**的**引用索引**，开发者可以轻松的、一目了然的看到该类型的广播在那些地方被发送过，在那些地方注册了接收器，十分易于管理和维护。而使用字符串来作为类型标识，使得开发者可以将不同类型的广播含义描述的足够清晰明白。
+    With the capabilities of modern IDEA, developer can create a unified broadcast type index table (or multiple) for the broadcast system. Through the reference index of IDEA, developer can easily , It can be seen at a glance that this type of broadcast has been sent in those places, and the receivers are registered in those places, which is very easy to manage and maintain. The use of character strings as type identifiers allows developer to describe the meaning of different types of broadcasts clearly enough.
     
 
-- **粘性广播支持**
+- **Sticky Broadcast Support**
     
-    **FBroadcast** 提供了发送**粘性广播**的支持。在还没有注册任何接收器的情况下，开发者可以在事件发生时，预先发送一条**粘性广播**。**粘性广播**会被暂时滞留在广播系统中，当有接收器被注册时，即会立即广播。这有助于帮助开发者在做逻辑设计时采取更清晰有效的思路。
+    **FBroadcast** provides support for sending **sticky broadcast**. In the case that no receiver has been registered, the developer can send a **sticky broadcast** in advance when the event occurs. **Sticky Broadcast** will be temporarily stuck in the broadcast system, and when a receiver is registered, it will broadcast immediately. This helps developer to adopt clearer and more effective thinking when doing logic design.
     
-    例如，当一个控制模块中的开关按钮被打开，而此时开关所控制的模块还没有被构建，就可以先发送一条**粘性广播**，在模块被构建完成注册了接收器后，就会立即接收到**粘性广播**而进入开启状态（这与互相依赖、定义统一状态管理或是参数传递，然后检查开关状态的思路有本质区别）。
+    For example, when the switch button in a control module is turned on, and the module controlled by the switch has not been built yet, you can send a **sticky broadcast** first, and after the module is built and the receiver is registered, It will immediately receive the **sticky broadcast** and enter the open state (this is essentially different from the idea of ​​mutual dependence, defining unified state management or parameter transfer, and then checking the switch state).
 
-## 📡 普通广播
+## 📡 Base Broadcast
 
-通过 **FBroadcast** 来注册，发送广播非常简便。
+Register through **FBroadcast**, sending broadcast is very easy.
 
 ```dart
-/// 注册接收器
-/// 
 /// register
 FBroadcast.instance().register(Key_Message, (value) {
   /// do something
 });
 
-/// 发送消息
-/// 
 /// send message
 FBroadcast.instance().broadcast(Key_Message);
 ```
 
-**FBroadcast** 允许开发者在发送消息的时候，带有数据。
+**FBroadcast** allows developer to include data when sending messages.
 
 ```dart
-/// 注册接收器
-/// 
+
 /// register
 FBroadcast.instance().register(Key_Message, (value) {
-  /// 获取数据
-  /// 
+
   /// get data
   var data = value;
 });
 
-/// 发送消息和数据
-/// 
 /// send message and data
 FBroadcast.instance().broadcast(
-  /// 消息类型
-  /// 
+
   /// message type
   Key_Message, 
 
-  /// 数据
-  /// 
   /// data
   value: data,
 );
 ```
 
-开发者可以选择将特定类型的消息进行持久化，这样就能轻易实现广播式的全局状态管理。
+Developer can choose to persist specific types of messages, so that they can easily implement broadcast-style global state management.
 
 ```dart
 FBroadcast.instance().broadcast(
-  /// 消息类型
-  /// 
   /// message type
   Key_Message, 
 
-  /// 数据
-  /// 
   /// data
   value: data, 
 
-  /// 将消息类型持久化
-  /// 
   /// Persist the message types
   persistence: true,
 );
 ```
 
-当开发者将一个消息类型持久化后，就可以在任意位置，通过 `FBroadcast.value(String key)` 来获取广播系统中该类型消息的最新的数据。而更新广播系统中的数据只需要通过 `broadcast()` 即可完成。
+After the developer persists a message type, he can use `FBroadcast.value(String key)` to get the latest data of the message type in the broadcast system at any location. The update of the data in the broadcast system only needs to be done through `broadcast()`.
 
-> ⚠️注意，一个消息类型一旦持久化就只能通过 `FBroadcast.instance().clear(String key)` 来从广播系统中移除该类型的消息。
+> ⚠️Note that once a message type is persisted, it can only be removed from the broadcast system through `FBroadcast.instance().clear(String key)`.
 
+## 🧲 Sticky Broadcast
 
-## 🧲 粘性广播
-
-**FBroadcast** 支持开发者发送**粘性广播**。
+**FBroadcast** allows developer to send **Sticky Broadcasts**.
 
 ```dart
 FBroadcast.instance().stickyBroadcast(
-  /// 消息类型
-  /// 
   /// message type
   Key_Message, 
 
-  /// 数据
-  /// 
   /// data
   value: data, 
 );
 ```
 
-当广播系统中没有对应类型的接收器时，**粘性广播** 将会暂时滞留在系统中，直到有该类型的接收器被注册，则会立即发出广播（当广播系统中有对应类型的接收器时，就和普通广播具有相同的表现）。
+When there is no corresponding type of receiver in the broadcast system, **sticky broadcast** will temporarily stay in the system until a receiver of this type is registered, and the broadcast will be sent out immediately (when there is a corresponding type in the broadcast system The receiver has the same performance as ordinary broadcast).
 
-## 🌏 环境注册
+## 🌏 Bind Context
 
-**FBroadcast** 支持在注册接收器时传入一个**环境对象（可以是任意类型）**，这会将接收器注册到环境中，当环境解构时，开发者可以方便的一次性移除所有在该环境中注册的接收器。
+**FBroadcast** supports passing in an **environment object (can be of any type)** when registering the receiver, which will register the receiver in the environment. When the environment is deconstructed, developer can easily move it all at once. Except for all receivers registered in the environment.
 
 ```dart
-/// 注册接收器
-/// 
 /// register
 FBroadcast.instance().register(
-  /// 消息类型
-  /// 
   /// Message type
   Key_Message1,
 
-  /// Receiver
-  ///
   /// Receiver
   (value) {
     /// do something
   },
 
-  /// 更多接收器
-  /// 
   /// more receiver
   more: {
-    /// 消息类型： 接收器
-    /// 
     /// Message type: Receiver
     Key_Message2: (value) {
       /// do something
@@ -236,28 +204,24 @@ FBroadcast.instance().register(
     },
   },
 
-  /// 环境对象
-  /// 
   /// context
   context: this,
 );
 
-/// 移除环境中的所有接收器
-/// 
 /// Remove all receivers from the environment
 FBroadcast.instance().unregister(this);
 ```
 
-## 👀 使用示例
+## 👀 Example
 
 
-### 💫 消息传递
+### 💫 Messaging
 
-> **场景**：点击 **Start**，Runner 开始 Run，显示屏需要实时更新运动员的状态。
+**Scene**: Click **Start**, the Runner starts Run, and the display needs to update the status of the athlete in real time.
 
 ![](https://gw.alicdn.com/tfs/TB1ZgoHg_M11u4jSZPxXXahcXXa-1280-869.gif)
 
-#### 🏃 1. 创建 Runner: 
+#### 🏃 1. Create Runner: 
 ```dart
 /// Runner
 class Runner {
@@ -287,7 +251,7 @@ class Runner {
 }
 ```
 
-#### 🍭 2. 创建 UI:
+#### 🍭 2. Create UI:
 
 ```dart
 Column(
@@ -327,25 +291,25 @@ Column(
 )
 ```
 
-在上面的示例中，通过 **FBroadcast** 简单清晰的实现了 Runner 和 UI 之间的通信。
+In the above example, the communication between the Runner and the UI is realized simply and clearly through **FBroadcast**.
   
-> 1. 点击 Start 按钮，通过 **FBroadcast** 发送起跑消息给 Runner；
+> 1. Click the Start button and send the start message to the Runner through **FBroadcast**;
 
-> 2. Runner 收到消息后，开始 Run，同时不断通过 **FBroadcast** 发出 Running info；
+> 2. After the Runner receives the message, it starts to run and continuously sends out Running info through **FBroadcast**;
 
-> 3. UI 由于注册了接收器，在接收到 Running info 时，通过 `FBroadcast.value()` 获取消息数据，自动更新视图。
+> 3. Since the UI is registered with the receiver, when it receives Running info, it gets the message data through `FBroadcast.value()` and automatically updates the view.
 
-整个过程中，Runner 和 UI 之间是**完全解耦**的，且 UI 只需在 `init` 中**注册接收器**（receiver 中调用 `setState((){})`），就能根据消息数据的变化，自动实时的更新视图，而无需开发者关心整个过程。
-
-
-### 📱 局部状态管理
+Throughout the process, the Runner and the UI are **completely decoupled**, and the UI only needs to **register the receiver** in `init` (call `setState((){})` in the receiver), The view can be automatically updated in real time according to the changes in the message data, without the developer needing to care about the entire process.
 
 
-> **场景**：点击改变UI颜色
+### 📱 Local state management
+
+
+> **Scene**: Click to change the UI color
 
 ![](https://gw.alicdn.com/tfs/TB1jDjHQUY1gK0jSZFCXXcwqXXa-1280-869.gif)
 
-#### 📝 1. 点击发出事件
+#### 📝 1. Click to emit event
 
 ```dart
 FButton(
@@ -358,7 +322,7 @@ FButton(
 )
 ```
 
-#### 📝 2. UI 注册接收器
+#### 📝 2. UI register receiver
 
 ```dart
 Stateful(
@@ -386,18 +350,18 @@ Stateful(
 )
 ```
 
-通过 **FBroadcast** 可以很轻易的完成 UI 交互之间的局部状态更新。上面的示例展示了颜色的变更，数据对象只有一个参数，实际开发过程中，开发者可以根据需要将通信的数据对象进行丰富扩展。
+Through **FBroadcast**, partial status updates between UI interactions can be easily completed. The above example shows the color change. The data object has only one parameter. In the actual development process, the developer can enrich the communication data object as needed.
 
-开发者只需要在需要更新 UI 的 Widget 中**注册接收器**，调用一次 `setState((){})`，在交互点发出消息。而不用去主动的将触发逻辑和 `setState((){})` 在所有的交互点都写一次。
+Developer only need to **register the receiver** in the Widget that needs to update the UI, call `setState((){})` once to send a message at the interaction point. Instead of actively writing the trigger logic and `setState((){})` at all interaction points.
 
 
-### 💻 全局状态管理
+### 💻 Global state management
 
-> **场景**：点击头像跳转登陆页，当账号密码不为 null 时，登陆按钮才可以点击。点击登陆按钮发送登陆请求，登陆成功后，返回上一页，刷新用户信息。
+> **Scene**: Click on the avatar to jump to the login page. When the account password is not null, the login button can be clicked. Click the login button to send a login request. After the login is successful, return to the previous page and refresh the user information.
 
 ![](https://gw.alicdn.com/tfs/TB1kOvGQKH2gK0jSZJnXXaT1FXa-1280-869.gif)
 
-#### 📝 1. 用户信息Widget注册接收器
+#### 📝 1. User Information Widget registration receiver
 
 ```dart
 class Avatar extends StatefulWidget {
@@ -448,9 +412,9 @@ class _AvatarState extends State<Avatar> {
 }
 ```
 
-登陆页中注册 `Key_User` 接收器，当接收到登陆消息时，取出其中的数据，刷新UI。
+Register the `Key_User` receiver in the login page. When the login message is received, the data in it will be retrieved and the UI will be refreshed.
 
-#### 📝 2. 构建数据模型
+#### 📝 2. Build a data model
 
 ```dart
 class User{
@@ -461,7 +425,7 @@ class User{
 }
 ```
 
-#### 📝 3. 构建逻辑处理对象
+#### 📝 3. Build logical processing objects
 
 ```dart
 class LoginHandler {
@@ -507,9 +471,9 @@ class LoginHandler {
 }
 ```
 
-将逻辑处理转移到 **LoginHandler** 中进行隔离，所有的处理结果都通过 **FBroadcast** 广播出去，使注册到广播系统中的对应接收器能够响应。
+The logical processing is transferred to **LoginHandler** for isolation, and all processing results are broadcasted through **FBroadcast**, so that the corresponding receivers registered in the broadcasting system can respond.
 
-#### 📝 4. 登陆页
+#### 📝 4. Login page
 
 ```dart
 class LoginPage extends StatefulWidget {
@@ -593,9 +557,9 @@ class _LoginPageState extends State<LoginPage> {
 }
 ```
 
-注册接收器时，只需在接收回调中调用 `setState((){})`，后续所有的数据变化刷新，开发者就可以不用关注了。而给 UI 赋值可以方便的通过 **FBroadcast.value()** 获取对应数据来进行。
+When registering the receiver, you only need to call `setState((){})` in the receive callback, and all subsequent data changes are refreshed, and the developer can no longer pay attention. The UI assignment can be conveniently done by obtaining the corresponding data through **FBroadcast.value()**.
 
-> ⚠️注意，对于需要全局使用的状态/数据模型，它们对应的广播类型，在发送时，**需要至少有一次将 persistence** 设置为 **true**。上面示例中，就在登陆成功后，对 `Key_User` 类型的广播进行了持久化。
+> ⚠️Note that for the state/data models that need to be used globally, and their corresponding broadcast types, when sending, **need to set persistence** to **true** at least once. In the above example, just after the login is successful, the broadcast of the `Key_User` type is persisted.
 
 ```dart
 /// login success，send login success message —— Key_User
@@ -611,26 +575,17 @@ FBroadcast.instance().broadcast(
 );
 ```
 
-上面的示例中展示了通过 **FBroadcast** 可以轻松快速的实现**消息传递**，进行 **局部、全局状态管理和刷新**，很好的将**各个模块，逻辑以及UI** 进行解耦。**FBroadcast** 提供了简洁易懂，而且十分灵活的广播系统，极少的束缚让开发者可以快速上手，轻松实现复杂逻辑的简化，帮助开发者构建出**易于维护的、复杂的、精美的**应用。
+The above example shows that through **FBroadcast**, **message transfer** can be easily and quickly realized, **local and global state management and refresh**, and **each module, logic and UI** are well integrated decoupling. **FBroadcast** provides a simple, easy-to-understand, and very flexible broadcasting system. With few constraints, developer can quickly get started, easily implement complex logic simplification, and help developer build **easy to maintain, complex, Beautiful** application.
 
-**FBroadcast** 在使用过程中，配合统一的**广播类型注册表**（也可以按模块分多张），开发者可以很轻易的借助 **IDEA** 的引用检索能力，随时查看所有广播的情况，对于不断迭代过程中的维护十分有益。
+**FBroadcast** In the process of using, with a unified **broadcast type registration form** (multiple sheets can also be divided into modules), developer can easily use **IDEA**'s citation retrieval capabilities to view at any time All broadcast conditions are very useful for maintenance in the continuous iteration process.
 
 ![](https://gw.alicdn.com/tfs/TB1eg6tdQcx_u4jSZFlXXXnUFXa-1280-442.gif)
 
-## 📖 Api 说明
+## 📖 Api
 
-### 📌 注册接收者
+### 📌 Register receiver
 
 ```dart
-/// 注册指定类型的接收者。
-/// 如果传入了 [context] 环境，该接收者将会被注册到环境中。环境可以是任意类型的对象，例如：页面、类..
-/// 接收者通过 [value] 可以获取到本条消息携带的数据。
-/// 当调用 [unregister] 时，该接收者即会被清除。
-/// [key] - 消息类型
-/// [receiver] - 接收者
-/// [context] - 环境。不为null，[receiver] 将会被注册到环境中。
-/// [more] - 方便一次注册多个接收者
-///
 /// Register recipients of the specified type.
 /// If the [context] environment is passed in, the recipient will be registered in the environment. The environment can be any type of object, for example: page, class...
 /// The receiver can get the data carried in this message through [value].
@@ -642,38 +597,23 @@ FBroadcast.instance().broadcast(
 FBroadcast register(String key, ValueCallback receiver, {Object context, Map<String, ValueCallback> more})
 ```
 
-### 📌 发送广播
+### 📌 Send Broadcast
 
-#### 📡 普通广播
+#### 📡 Base Broadcast
 
 ```dart
-/// 广播一条 [key] 类型的消息。
-/// 已经注册在系统中的接收者将会接收到本条消息。
-/// 接收者通过 [value] 可以获取到本条消息携带的数据。
-/// [key] - 消息类型
-/// [value] - 消息携带的数据。可以是任意类型或是null。
-/// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
-///
 /// Broadcast a message of type [key].
 /// Recipients already registered in the system will receive this message.
 /// The receiver can get the data carried in this message through [value].
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
-/// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
+/// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developer can use the [clear] function to remove persistent message types.
 void broadcast(String key, {dynamic value, bool persistence})
 ```
 
-#### 🧲 发送粘性广播
+#### 🧲 Send Sticky Broadcast
 
 ```dart
-/// 广播一条 [key] 类型的粘性消息。
-/// 如果广播系统中还有没注册该类型的接收者，本条消息将被滞留在系统中。一旦有该类型接收者被注册，本条消息将会被立即发送给接收者。
-/// 如果系统中已经注册有该类型的接收者，本条消息将会被立即发送给接收者。
-/// 接收者通过 [value] 可以获取到本条消息携带的数据。
-/// [key] - 消息类型
-/// [value] - 消息携带的数据。可以是任意类型或是null。
-/// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
-///
 /// Broadcast a sticky message of type [key].
 /// If there are unregistered receivers of this type in the broadcast system, this message will be stuck in the system. Once a recipient of this type is registered, this message will be sent to the recipient immediately.
 /// If this type of receiver is already registered in the system, this message will be sent to the receiver immediately.
@@ -681,28 +621,20 @@ void broadcast(String key, {dynamic value, bool persistence})
 ///
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
-/// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
+/// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developer can use the [clear] function to remove persistent message types.
 void stickyBroadcast(String key, {dynamic value, bool persistence})
 ```
 
-### 📌 获取指定消息的数据包
+### 📌 Get the data packet of the specified message
 
 ```dart
-/// 接收者可以通过该函数获取消息中的数据
-///
 /// This function allows the receiver to get the data in the message
 static T value<T>(String key)
 ```
 
-### 📌 移除指定接收者
+### 📌 Remove specified receiver
 
 ```dart
-/// 移除指定的接收者 [receiver]。
-/// 如果指定了 [key]、[context] 将有助于更快的移除指定接收者。
-/// [receiver] - 接收者
-/// [key] - 消息类型
-/// [context] - 环境。
-///
 /// Remove the specified receiver [receiver].
 /// If [key] and [context] are specified, it will help to remove the specified recipient faster.
 /// [receiver] - receiver
@@ -711,26 +643,18 @@ static T value<T>(String key)
 FBroadcast remove(ValueCallback receiver, {String key, Object context})
 ```
 
-### 📌 移除指定类型消息
+### 📌 Remove the specified type of message
 
 ```dart
-/// 移除广播系统中的指定 [key] 类型的所有接收者，以及该类型的粘性广播。
-/// [key] - 类型
-///
 /// Remove all receivers of the specified [key] type in the broadcast system and sticky broadcasts of that type.
 ///  [key] - type
 void clear(String key)
 ```
 
 
-### 📌 移除环境内所有接收者
+### 📌 Remove all receiver in the context
 
 ```dart
-/// 移除广播系统中，注册到 [context] 环境内的所有接收者。
-/// 例如，在页面关闭时，开发者可以通过 [unregister] 一次性移除注册到该环境内的所有接收者。
-/// 当然，前提时在接收者通过 [register] 注册的时候，传入 [context]，将接收者注册到该环境中。
-/// [context] - 环境。
-///
 /// Remove all receivers registered in the [context] environment from the broadcast system.
 /// For example, when the page is closed, the developer can use [unregister] to remove all recipients registered in the environment at once.
 /// Of course, the prerequisite is that when the receiver registers through [register], pass in [context] to register the receiver to the environment.
@@ -739,40 +663,38 @@ void unregister(Object context)
 ```
 
 
-### 📌 释放广播系统
+### 📌 Release Broadcast
 
 ```dart
-/// 会移除广播系统中的所有的接收者，以及粘性广播。
-///
 /// Remove all receivers in the broadcasting system, and sticky broadcasting.
 void dispose()
 ```
 
-# 😃 如何使用？
 
-在项目 `pubspec.yaml` 文件中添加依赖：
+# 😃 How to use？
 
-## 🌐 pub 依赖方式
+Add dependencies in the project `pubspec.yaml` file:
+
+## 🌐 pub dependency
 
 ```
 dependencies:
-  fbroadcast: ^<版本号>
+  fbroadcast: ^<version number>
 ```
 
-> ⚠️ 注意，请到 [**pub**](https://pub.dev/packages/fbroadcast) 获取 **FBroadcast** 最新版本号
+> ⚠️ Attention，please go to [**pub**] (https://pub.dev/packages/fbroadcast) to get the latest version number of **FBroadcast**
 
-## 🖥 git 依赖方式
+## 🖥 Git dependency
 
 ```
 dependencies:
   fbroadcast:
     git:
       url: 'git@github.com:Fliggy-Mobile/fbroadcast.git'
-      ref: '<分支号 或 tag>'
+      ref: '<Branch number or tag number>'
 ```
 
-
-> ⚠️ 注意，分支号 或 tag 请以 [**FBroadcast**](https://github.com/Fliggy-Mobile/fbroadcast) 官方项目为准。
+> ⚠️ Attention，please refer to [**FBroadcast**] (https://github.com/Fliggy-Mobile/fbroadcast) official project for branch number or tag.
 
 
 # 💡 License
@@ -795,22 +717,22 @@ limitations under the License.
 ```
 
 
-### 感觉还不错？请投出您的 [**Star**](https://github.com/Fliggy-Mobile/fbroadcast) 吧 🥰 ！
+### Like it? Please cast your [**Star**](https://github.com/Fliggy-Mobile/fbroadcast) 🥰 ！
 
 
 ---
 
-# 如何运行 Demo 工程？
+# How to run Demo project?
 
-1.**clone** 工程到本地
+1. **clone** project to local
 
-2.进入工程 `example` 目录，运行以下命令
+2. Enter the project `example` directory and run the following command
 
 ```
 flutter create .
 ```
 
-3.运行 `example` 中的 Demo
+3. Run the demo in `example`
 
 
 

@@ -48,7 +48,8 @@
 
 </div>
 
-![](https://gw.alicdn.com/tfs/TB1CGaHQQY2gK0jSZFgXXc5OFXa-1560-692.png)
+![](https://gw.alicdn.com/tfs/TB1IjopQUT1gK0jSZFrXXcNCXXa-1560-840.png)
+
 
 **[English](https://github.com/Fliggy-Mobile/fbroadcast) | 简体中文**
 

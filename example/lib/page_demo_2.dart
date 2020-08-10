@@ -156,16 +156,7 @@ class PageDemo2 extends StatelessWidget {
                             height: 100,
                             backgroundColor: mainBackgroundColor,
                             corner: FCorner.all(6.0),
-                            onClick: () {
-                              FBroadcast.instance().broadcast(
-                                Key_User,
-                                value: User()
-                                  ..name = "FWidget"
-                                  ..info =
-                                      "Seriously provide exquisite widget to help you build exquisite application.",
-                                persistence: true,
-                              );
-                            },
+                            onClick: () {},
                           ),
                           const SizedBox(height: 16),
                           FSuper(
