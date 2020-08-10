@@ -407,16 +407,24 @@ class Avatar extends StatefulWidget {
 }
 
 class _AvatarState extends State<Avatar> {
+
+  User user;
+  int msgCount = 0;
   @override
   void initState() {
     super.initState();
     FBroadcast.instance().register(
       Key_MsgCount,
       /// register Key_MsgCount reviver
-      (value) => setState(() {}),
+      (value) => setState(() {
+        msgCount = value;
+      }),
       more: {
         /// register Key_User reviver
-        Key_User: (value) => setState(() {}),
+        Key_User: (value) => setState(() {
+          /// get value
+          user = value;
+        }),
       },
       /// bind context
       context: this,
@@ -425,9 +433,6 @@ class _AvatarState extends State<Avatar> {
 
   @override
   Widget build(BuildContext context) {
-    /// get value from FBroadcast
-    User user = FBroadcast.value<User>(Key_User);
-    int msgCount = FBroadcast.value(Key_MsgCount) ?? 0;
     return FSuper(
       ...
       backgroundImage: (user == null || _textIsEmpty(user.avatar)) ? null : AssetImage(user.avatar),
