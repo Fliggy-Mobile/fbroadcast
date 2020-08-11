@@ -34,7 +34,7 @@ class FBroadcast {
   ///
   /// This function allows the receiver to get the data in the message
   static T value<T>(String key){
-    if (_textIsEmpty(key)) return null;
+    if (_textIsEmpty(key) || instance()._map == null) return null;
     var value = instance()._map[key]?.value;
     if (value == null) return null;
     if (!(value is T)) {
@@ -44,6 +44,7 @@ class FBroadcast {
   }
 
   _Notifier _get(String key) {
+    if (_map == null) return null;
     if (_textIsEmpty(key)) throw Exception("The key can't be null or empty!");
     if (!_map.containsKey(key)) {
       _map[key] = _Notifier(null);
@@ -72,6 +73,7 @@ class FBroadcast {
   /// [value] - The data carried in the message. Can be any type or null.
   /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
   void broadcast(String key, {dynamic value, bool persistence = false}) {
+    if (_map == null) return;
     if (_textIsEmpty(key)) return;
     if (persistence && !_get(key).persistence) {
       _get(key).persistence = true;
@@ -112,6 +114,7 @@ class FBroadcast {
   /// [value] - The data carried in the message. Can be any type or null.
   /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
   void stickyBroadcast(String key, {dynamic value, bool persistence = false}) {
+    if (_map == null) return;
     if (_textIsEmpty(key)) return;
     if (persistence && !_get(key).persistence) {
       _get(key).persistence = true;
@@ -146,6 +149,7 @@ class FBroadcast {
     Object context,
     Map<String, ValueCallback> more,
   }) {
+    if (_map == null) return this;
     if (!_textIsEmpty(key) && receiver != null) {
       _get(key).addListener(receiver);
       if (context != null && !_getReceivers(context).contains(receiver)) {
@@ -185,6 +189,7 @@ class FBroadcast {
   /// [key]-message type
   /// [context] - context.
   void remove(ValueCallback receiver, {String key, Object context}) {
+    if (_map == null) return;
     if (receiver == null) return;
     if (!_textIsEmpty(key)) {
       _get(key).removeListener(receiver);
@@ -221,6 +226,7 @@ class FBroadcast {
   /// Of course, the prerequisite is that when the receiver registers through [register], pass in [context] to register the receiver to the environment.
   /// [context] - context.
   void unregister(Object context) {
+    if (_map == null) return;
     if (context != null) {
       for (ValueCallback listener in _getReceivers(context)) {
         _map.forEach((key, notifier) {
@@ -237,6 +243,7 @@ class FBroadcast {
   ///
   /// Removes a [Notifier] that does not have a receiver and is not persistent
   void _checkMap() {
+    if (_map == null) return;
     List<String> needRemove = [];
     _map.forEach((key, value) {
       if (!value.hasListeners && !(value.persistence ?? false)) {
@@ -254,6 +261,7 @@ class FBroadcast {
   /// Remove all receivers of the specified [key] type in the broadcast system and sticky broadcasts of that type.
   ///  [key] - type
   void clear(String key) {
+    if (_map == null) return;
     _Notifier remove = _map.remove(key);
     if (remove?.hasListeners ?? false) {
       remove.listeners?.forEach((receiver) {
@@ -279,12 +287,14 @@ class FBroadcast {
   ///
   /// Remove all receivers in the broadcasting system, and sticky broadcasting.
   void dispose() {
+    if (_map == null) return;
     _map.forEach((key, value) {
       value.dispose();
     });
     _map.clear();
     _receiverCache.clear();
     _stickyMap.clear();
+    _map = null;
   }
 }
 
