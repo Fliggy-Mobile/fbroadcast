@@ -27,7 +27,7 @@ class PageDemo1 extends StatelessWidget {
                 initState: (setState, data) {
                   FBroadcast.instance().register(
                     Key_RunnerState,
-                    (value) {
+                    (value, _) {
                       /// update
                       setState(() {});
                     },

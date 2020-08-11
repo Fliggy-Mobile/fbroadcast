@@ -67,6 +67,8 @@
 
 - 不可思议的**粘性广播**
 
+- **双向通信**支持
+
 - 易于构建简单明确的局部和全局状态管理
 
 # 🛠 使用指南
@@ -113,7 +115,7 @@
 /// 注册接收器
 /// 
 /// register
-FBroadcast.instance().register(Key_Message, (value) {
+FBroadcast.instance().register(Key_Message, (value, callback) {
   /// do something
 });
 
@@ -129,7 +131,7 @@ FBroadcast.instance().broadcast(Key_Message);
 /// 注册接收器
 /// 
 /// register
-FBroadcast.instance().register(Key_Message, (value) {
+FBroadcast.instance().register(Key_Message, (value, callback) {
   /// 获取数据
   /// 
   /// get data
@@ -198,6 +200,55 @@ FBroadcast.instance().stickyBroadcast(
 
 当广播系统中没有对应类型的接收器时，**粘性广播** 将会暂时滞留在系统中，直到有该类型的接收器被注册，则会立即发出广播（当广播系统中有对应类型的接收器时，就和普通广播具有相同的表现）。
 
+## ⛓ 双向通信
+
+**FBroadcast** 支持在广播发送点接收**接收器**返回的消息。
+
+```dart
+/// 发送消息
+/// 
+/// send message
+FBroadcast.instance().broadcast(
+  /// 消息类型
+  /// 
+  /// message type
+  Key_Message, 
+
+  /// 数据
+  /// 
+  /// data
+  value: data, 
+  
+  /// 接收器返回的消息
+  /// 
+  /// The message returned by the receiver
+  callback: (value){
+    // do something
+  }
+);
+
+
+/// 注册接收器
+/// 
+/// register
+FBroadcast.instance().register(Key_Message, (value, callback) {
+  /// 获取数据
+  /// 
+  /// get data
+  var data = value;
+
+  /// do something
+  var result = logic();
+
+  /// 返回消息
+  /// 
+  /// return message
+  callback(result);
+});
+```
+
+通过 **FBroadcast** 能够十分轻松的实现双向通信。
+
 ## 🌏 环境注册
 
 **FBroadcast** 支持在注册接收器时传入一个**环境对象（可以是任意类型）**，这会将接收器注册到环境中，当环境解构时，开发者可以方便的一次性移除所有在该环境中注册的接收器。
@@ -215,7 +266,7 @@ FBroadcast.instance().register(
   /// Receiver
   ///
   /// Receiver
-  (value) {
+  (value, callback) {
     /// do something
   },
 
@@ -226,13 +277,13 @@ FBroadcast.instance().register(
     /// 消息类型： 接收器
     /// 
     /// Message type: Receiver
-    Key_Message2: (value) {
+    Key_Message2: (value, callback) {
       /// do something
     },
-    Key_Message3: (value) {
+    Key_Message3: (value, callback) {
       /// do something
     },
-    Key_Message4: (value) {
+    Key_Message4: (value, callback) {
       /// do something
     },
   },
@@ -264,7 +315,7 @@ FBroadcast.instance().unregister(this);
 class Runner {
   Runner() {
     /// register
-    FBroadcast.instance().register(Key_RunnerState, (value) {
+    FBroadcast.instance().register(Key_RunnerState, (value, callback) {
       if (value is String && value.contains("Run")) {
         /// receive start run message
         FBroadcast.instance().broadcast(Key_RunnerState, value: "0m..");
@@ -299,7 +350,7 @@ Column(
       initState: (setState, data) {
         FBroadcast.instance().register(
           Key_RunnerState,
-          (value) {
+          (value, callback) {
             /// refresh ui
             setState(() {});
           },
@@ -339,6 +390,68 @@ Column(
 整个过程中，Runner 和 UI 之间是**完全解耦**的，且 UI 只需在 `init` 中**注册接收器**（receiver 中调用 `setState((){})`），就能根据消息数据的变化，自动实时的更新视图，而无需开发者关心整个过程。
 
 
+### ⛓ 双向通信
+
+> **场景**：点击按钮请求定位，定位成功后接收结果，刷新定位点
+
+![](https://gw.alicdn.com/tfs/TB18D6vQ.Y1gK0jSZFMXXaWcVXa-1280-951.gif)
+
+#### 📝 1. 全局定位服务提供商
+
+```dart
+class LocationServer {
+  LocationServer() {
+    init();
+  }
+
+  init() {
+    /// register Key_Location receiver
+    FBroadcast.instance().register(Key_Location, (value, callback) async {
+      var loc = await location();
+
+      /// return message
+      callback(loc);
+    });
+  }
+
+  /// Analog positioning
+  Future<List<double>> location() async {
+    await Future.delayed(Duration(milliseconds: 2000));
+    return [Random().nextDouble() * 280, Random().nextDouble() * 150];
+  }
+}
+
+```
+
+#### 📝 2. 点击发送定位请求，接收返回消息
+
+
+```dart
+
+FButton(
+  ...
+  text: "Location",
+  onPressed: () {
+    FLoading.show(context,
+        color: Colors.black26, loading: buildLoading());
+    /// request location
+    FBroadcast.instance().broadcast(Key_Location,
+        callback: (location) {
+      /// The message returned by the receiver
+      setState(() {
+        FLoading.hide();
+        this.location = location;
+      });
+    });
+  },
+)
+
+```
+
+**FBroadcast** 能够进一步简化需要双向通信的场景。开发者可以看到，在这个例子中，通过 **FBroadcast** 能够轻松的实现定位请求这种双向通信的场景，而且使得**定位服务提供商**和**UI**实现的完全的解耦。
+
+**UI交互点**只需要发送定位请求的广播，任何注册该广播的**定位服务提供商**就可以接收该请求进行处理，然后返回结果到**UI交互点**。也就是说，随着项目的演进，开发者可以随时提供新的**定位服务提供商**，而无需关心任何的**UI**变更。
+
 ### 📱 局部状态管理
 
 
@@ -368,7 +481,7 @@ Stateful(
     /// register
     FBroadcast.instance().register(
       Key_Color,
-      (value) {
+      (value, callback) {
         /// refresh ui
         setState(() {
         });
@@ -416,12 +529,12 @@ class _AvatarState extends State<Avatar> {
     FBroadcast.instance().register(
       Key_MsgCount,
       /// register Key_MsgCount reviver
-      (value) => setState(() {
+      (value, callback) => setState(() {
         msgCount = value;
       }),
       more: {
         /// register Key_User reviver
-        Key_User: (value) => setState(() {
+        Key_User: (value, callback) => setState(() {
           /// get value
           user = value;
         }),
@@ -565,10 +678,10 @@ class _LoginPageState extends State<LoginPage> {
           FBroadcast.instance().register(
             Key_Login,
             /// refresh ui
-            (value) => setState(() {}),
+            (value, callback) => setState(() {}),
             more: {
               /// register user receiver
-              Key_User: (value) {
+              Key_User: (value, callback) {
                 FLoading.hide();
                 Navigator.pop(context);
               },
@@ -645,7 +758,7 @@ FBroadcast.instance().broadcast(
 /// [receiver] - receiver
 /// [context] - context. Not null, [receiver] will be registered in the environment.
 /// [more] - Make it easy to register multiple recipients at once
-FBroadcast register(String key, ValueCallback receiver, {Object context, Map<String, ValueCallback> more})
+FBroadcast register(String key, ResultCallback receiver, {Object context, Map<String, ResultCallback> more})
 ```
 
 ### 📌 发送广播
@@ -658,6 +771,7 @@ FBroadcast register(String key, ValueCallback receiver, {Object context, Map<Str
 /// 接收者通过 [value] 可以获取到本条消息携带的数据。
 /// [key] - 消息类型
 /// [value] - 消息携带的数据。可以是任意类型或是null。
+/// [callback] - 能够收到接收器返回的消息
 /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
 ///
 /// Broadcast a message of type [key].
@@ -665,8 +779,9 @@ FBroadcast register(String key, ValueCallback receiver, {Object context, Map<Str
 /// The receiver can get the data carried in this message through [value].
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
+/// [callback] - Able to receive the message returned by the receiver
 /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
-void broadcast(String key, {dynamic value, bool persistence})
+void broadcast(String key, {dynamic value, ValueCallback callback, bool persistence = false})
 ```
 
 #### 🧲 发送粘性广播
@@ -678,6 +793,7 @@ void broadcast(String key, {dynamic value, bool persistence})
 /// 接收者通过 [value] 可以获取到本条消息携带的数据。
 /// [key] - 消息类型
 /// [value] - 消息携带的数据。可以是任意类型或是null。
+/// [callback] - 能够收到接收器返回的消息
 /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
 ///
 /// Broadcast a sticky message of type [key].
@@ -687,8 +803,9 @@ void broadcast(String key, {dynamic value, bool persistence})
 ///
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
+/// [callback] - Able to receive the message returned by the receiver
 /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
-void stickyBroadcast(String key, {dynamic value, bool persistence})
+void stickyBroadcast(String key, {dynamic value, ValueCallback callback, bool persistence = false})
 ```
 
 ### 📌 获取指定消息的数据包
@@ -714,7 +831,7 @@ static T value<T>(String key)
 /// [receiver] - receiver
 /// [key]-message type
 /// [context] - context.
-FBroadcast remove(ValueCallback receiver, {String key, Object context})
+FBroadcast remove(ResultCallback receiver, {String key, Object context})
 ```
 
 ### 📌 移除指定类型消息

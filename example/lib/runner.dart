@@ -6,7 +6,7 @@ import 'package:fbroadcast_example/broadcast_keys.dart';
 class Runner {
   Runner() {
     /// register
-    FBroadcast.instance().register(Key_RunnerState, (value) {
+    FBroadcast.instance().register(Key_RunnerState, (value, _) {
       if (value is String && value.contains("Run")) {
         /// receive start run message
         FBroadcast.instance().broadcast(Key_RunnerState, value: "0m..");

@@ -105,10 +105,10 @@ class _LoginPageState extends State<LoginPage> {
                       Key_Login,
 
                       /// refresh ui
-                      (value) => setState(() {}),
+                      (value, _) => setState(() {}),
                       more: {
                         /// register user receiver
-                        Key_User: (value) {
+                        Key_User: (value, _) {
                           FLoading.hide();
                           Navigator.pop(context);
                         },

@@ -17,6 +17,9 @@ String Key_Login = "Key_Login";
 // ignore: non_constant_identifier_names
 String Key_RunnerState = "Key_RunnerState";
 
+// ignore: non_constant_identifier_names
+String Key_Location = "Key_Location";
+
 
 
 

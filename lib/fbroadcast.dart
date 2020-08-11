@@ -11,7 +11,7 @@ export 'package:fbroadcast/stateful.dart';
 class FBroadcast {
   Map<String, _Notifier<dynamic>> _map;
   Map<String, dynamic> _stickyMap;
-  Map<Object, List<ValueCallback>> _receiverCache;
+  Map<Object, List<ResultCallback>> _receiverCache;
 
   FBroadcast._() {
     _map = {};
@@ -31,12 +31,13 @@ class FBroadcast {
   /// 接收者可以通过该函数获取消息中的数据
   ///
   /// This function allows the receiver to get the data in the message
-  static T value<T>(String key){
+  static T value<T>(String key) {
     if (_textIsEmpty(key) || instance()._map == null) return null;
     var value = instance()._map[key]?.value;
     if (value == null) return null;
     if (!(value is T)) {
-      debugPrintStack(label: 'Error: value type [${value.runtimeType}] is not [$T]');
+      debugPrintStack(
+          label: 'Error: value type [${value.runtimeType}] is not [$T]');
     }
     return value;
   }
@@ -62,6 +63,7 @@ class FBroadcast {
   /// 接收者通过 [value] 可以获取到本条消息携带的数据。
   /// [key] - 消息类型
   /// [value] - 消息携带的数据。可以是任意类型或是null。
+  /// [callback] - 能够收到接收器返回的消息
   /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
   ///
   /// Broadcast a message of type [key].
@@ -69,8 +71,10 @@ class FBroadcast {
   /// The receiver can get the data carried in this message through [value].
   /// [key] - Message type
   /// [value] - The data carried in the message. Can be any type or null.
+  /// [callback] - Able to receive the message returned by the receiver
   /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
-  void broadcast(String key, {dynamic value, bool persistence = false}) {
+  void broadcast(String key,
+      {dynamic value, ValueCallback callback, bool persistence = false}) {
     if (_map == null) return;
     if (_textIsEmpty(key)) return;
     if (persistence && !_get(key).persistence) {
@@ -88,6 +92,7 @@ class FBroadcast {
 //        _get(key).value = value;
 //      });
 //    }
+    _get(key).callback = callback;
     if (value == null || _get(key).value == value) {
       _get(key).notifyListeners();
     } else {
@@ -101,6 +106,7 @@ class FBroadcast {
   /// 接收者通过 [value] 可以获取到本条消息携带的数据。
   /// [key] - 消息类型
   /// [value] - 消息携带的数据。可以是任意类型或是null。
+  /// [callback] - 能够收到接收器返回的消息
   /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
   ///
   /// Broadcast a sticky message of type [key].
@@ -110,17 +116,19 @@ class FBroadcast {
   ///
   /// [key] - Message type
   /// [value] - The data carried in the message. Can be any type or null.
+  /// [callback] - Able to receive the message returned by the receiver
   /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developers can use the [clear] function to remove persistent message types.
-  void stickyBroadcast(String key, {dynamic value, bool persistence = false}) {
+  void stickyBroadcast(String key,
+      {dynamic value, ValueCallback callback, bool persistence = false}) {
     if (_map == null) return;
     if (_textIsEmpty(key)) return;
     if (persistence && !_get(key).persistence) {
       _get(key).persistence = true;
     }
     if (_map.containsKey(key) && _map[key].hasListeners) {
-      broadcast(key, value: value);
+      broadcast(key, value: value, callback: callback);
     } else {
-      _stickyMap[key] = value ?? Object();
+      _stickyMap[key] = _Notifier(value)..callback = callback;
     }
   }
 
@@ -143,9 +151,9 @@ class FBroadcast {
   /// [more] - Make it easy to register multiple recipients at once
   FBroadcast register(
     String key,
-    ValueCallback receiver, {
+    ResultCallback receiver, {
     Object context,
-    Map<String, ValueCallback> more,
+    Map<String, ResultCallback> more,
   }) {
     if (_map == null) return this;
     if (!_textIsEmpty(key) && receiver != null) {
@@ -154,9 +162,9 @@ class FBroadcast {
         _receiverCache[context].add(receiver);
       }
       if (_stickyMap.containsKey(key)) {
-        dynamic value = _stickyMap[key];
+        _Notifier notifier = _stickyMap[key];
         _stickyMap.remove(key);
-        broadcast(key, value: value);
+        broadcast(key, value: notifier.value, callback: notifier.callback);
       }
     }
     if (more?.isNotEmpty ?? false) {
@@ -166,9 +174,9 @@ class FBroadcast {
           _receiverCache[context].add(value);
         }
         if (_stickyMap.containsKey(key)) {
-          dynamic value = _stickyMap[key];
+          _Notifier notifier = _stickyMap[key];
           _stickyMap.remove(key);
-          broadcast(key, value: value);
+          broadcast(key, value: notifier.value, callback: notifier.callback);
         }
       });
     }
@@ -186,7 +194,7 @@ class FBroadcast {
   /// [receiver] - receiver
   /// [key]-message type
   /// [context] - context.
-  void remove(ValueCallback receiver, {String key, Object context}) {
+  void remove(ResultCallback receiver, {String key, Object context}) {
     if (_map == null) return;
     if (receiver == null) return;
     if (!_textIsEmpty(key)) {
@@ -226,7 +234,7 @@ class FBroadcast {
   void unregister(Object context) {
     if (_map == null) return;
     if (context != null) {
-      for (ValueCallback listener in _getReceivers(context)) {
+      for (ResultCallback listener in _getReceivers(context)) {
         _map.forEach((key, notifier) {
           notifier.removeListener(listener);
         });
@@ -302,9 +310,11 @@ bool _textIsEmpty(String text) {
 }
 
 typedef ValueCallback<T> = void Function(T value);
+typedef ResultCallback<T> = void Function(T value, ValueCallback callback);
 
 class _Notifier<T> {
   bool persistence;
+  ValueCallback callback;
 
   T get value => _value;
   T _value;
@@ -315,7 +325,7 @@ class _Notifier<T> {
     notifyListeners();
   }
 
-  ObserverList<ValueCallback> _listeners = ObserverList<ValueCallback>();
+  ObserverList<ResultCallback> _listeners = ObserverList<ResultCallback>();
 
   _Notifier(
     value, {
@@ -333,7 +343,7 @@ class _Notifier<T> {
     return true;
   }
 
-  ObserverList<ValueCallback> get listeners {
+  ObserverList<ResultCallback> get listeners {
     return _listeners;
   }
 
@@ -342,12 +352,12 @@ class _Notifier<T> {
     return _listeners.isNotEmpty;
   }
 
-  void addListener(ValueCallback listener) {
+  void addListener(ResultCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners.add(listener);
   }
 
-  void removeListener(ValueCallback listener) {
+  void removeListener(ResultCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners.remove(listener);
   }
@@ -360,11 +370,11 @@ class _Notifier<T> {
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
-      final List<ValueCallback> localListeners =
-          List<ValueCallback>.from(_listeners);
-      for (final ValueCallback listener in localListeners) {
+      final List<ResultCallback> localListeners =
+          List<ResultCallback>.from(_listeners);
+      for (final ResultCallback listener in localListeners) {
         try {
-          if (_listeners.contains(listener)) listener(value);
+          if (_listeners.contains(listener)) listener(value, callback);
         } catch (exception) {}
       }
     }

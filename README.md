@@ -66,6 +66,8 @@ Let’s take a look at **FBroadcast** that provides developer with incredible ca
 
 - Incredible **Sticky Broadcast**
 
+- **Two-way communication** support
+
 - Easy to build simple and clear local and global state management
 
 # 🛠 Guide
@@ -110,7 +112,7 @@ Register through **FBroadcast**, sending broadcast is very easy.
 
 ```dart
 /// register
-FBroadcast.instance().register(Key_Message, (value) {
+FBroadcast.instance().register(Key_Message, (value, callback) {
   /// do something
 });
 
@@ -123,7 +125,7 @@ FBroadcast.instance().broadcast(Key_Message);
 ```dart
 
 /// register
-FBroadcast.instance().register(Key_Message, (value) {
+FBroadcast.instance().register(Key_Message, (value, callback) {
 
   /// get data
   var data = value;
@@ -175,6 +177,41 @@ FBroadcast.instance().stickyBroadcast(
 
 When there is no corresponding type of receiver in the broadcast system, **sticky broadcast** will temporarily stay in the system until a receiver of this type is registered, and the broadcast will be sent out immediately (when there is a corresponding type in the broadcast system The receiver has the same performance as ordinary broadcast).
 
+## ⛓ Two-way communication
+
+**FBroadcast** supports receiving messages returned by **receiver** at the broadcast sending point.
+
+```dart
+/// send message
+FBroadcast.instance().broadcast(
+  /// message type
+  Key_Message, 
+
+  /// data
+  value: data, 
+  
+  /// The message returned by the receiver
+  callback: (value){
+    // do something
+  }
+);
+
+
+/// register
+FBroadcast.instance().register(Key_Message, (value, callback) {
+  /// get data
+  var data = value;
+
+  /// do something
+  var result = logic();
+
+  /// return message
+  callback(result);
+});
+```
+
+Through **FBroadcast**, two-way communication can be realized very easily.
+
 ## 🌏 Bind Context
 
 **FBroadcast** supports passing in an **environment object (can be of any type)** when registering the receiver, which will register the receiver in the environment. When the environment is deconstructed, developer can easily move it all at once. Except for all receivers registered in the environment.
@@ -186,20 +223,20 @@ FBroadcast.instance().register(
   Key_Message1,
 
   /// Receiver
-  (value) {
+  (value, callback) {
     /// do something
   },
 
   /// more receiver
   more: {
     /// Message type: Receiver
-    Key_Message2: (value) {
+    Key_Message2: (value, callback) {
       /// do something
     },
-    Key_Message3: (value) {
+    Key_Message3: (value, callback) {
       /// do something
     },
-    Key_Message4: (value) {
+    Key_Message4: (value, callback) {
       /// do something
     },
   },
@@ -214,7 +251,6 @@ FBroadcast.instance().unregister(this);
 
 ## 👀 Example
 
-
 ### 💫 Messaging
 
 **Scene**: Click **Start**, the Runner starts Run, and the display needs to update the status of the athlete in real time.
@@ -227,7 +263,7 @@ FBroadcast.instance().unregister(this);
 class Runner {
   Runner() {
     /// register
-    FBroadcast.instance().register(Key_RunnerState, (value) {
+    FBroadcast.instance().register(Key_RunnerState, (value, callback) {
       if (value is String && value.contains("Run")) {
         /// receive start run message
         FBroadcast.instance().broadcast(Key_RunnerState, value: "0m..");
@@ -262,7 +298,7 @@ Column(
       initState: (setState, data) {
         FBroadcast.instance().register(
           Key_RunnerState,
-          (value) {
+          (value, callback) {
             /// refresh ui
             setState(() {});
           },
@@ -302,6 +338,68 @@ In the above example, the communication between the Runner and the UI is realize
 Throughout the process, the Runner and the UI are **completely decoupled**, and the UI only needs to **register the receiver** in `init` (call `setState((){})` in the receiver), The view can be automatically updated in real time according to the changes in the message data, without the developer needing to care about the entire process.
 
 
+### ⛓ Two-way communication
+
+> **Scene**: Click the button to request positioning, receive the result after positioning is successful, and refresh the positioning point
+
+![](https://gw.alicdn.com/tfs/TB18D6vQ.Y1gK0jSZFMXXaWcVXa-1280-951.gif)
+
+#### 📝 1. Global Positioning Service Provider
+
+```dart
+class LocationServer {
+  LocationServer() {
+    init();
+  }
+
+  init() {
+    /// register Key_Location receiver
+    FBroadcast.instance().register(Key_Location, (value, callback) async {
+      var loc = await location();
+
+      /// return message
+      callback(loc);
+    });
+  }
+
+  /// Analog positioning
+  Future<List<double>> location() async {
+    await Future.delayed(Duration(milliseconds: 2000));
+    return [Random().nextDouble() * 280, Random().nextDouble() * 150];
+  }
+}
+
+```
+
+#### 📝 2. Click to send location request and receive return message
+
+
+```dart
+
+FButton(
+  ...
+  text: "Location",
+  onPressed: () {
+    FLoading.show(context,
+        color: Colors.black26, loading: buildLoading());
+    /// request location
+    FBroadcast.instance().broadcast(Key_Location,
+        callback: (location) {
+      /// The message returned by the receiver
+      setState(() {
+        FLoading.hide();
+        this.location = location;
+      });
+    });
+  },
+)
+
+```
+
+**FBroadcast** can further simplify scenarios that require two-way communication. Developers can see that in this example, through **FBroadcast**, the two-way communication scenario of location request can be easily realized, and the **location service provider** and **UI** can be completely realized. Decoupling.
+
+The **UI interaction point** only needs to send a broadcast of the positioning request, and any **location service provider** registered for the broadcast can receive the request for processing, and then return the result to the **UI interaction point**. In other words, as the project evolves, developers can provide new **location service providers** at any time without having to care about any **UI** changes.
+
 ### 📱 Local state management
 
 
@@ -331,7 +429,7 @@ Stateful(
     /// register
     FBroadcast.instance().register(
       Key_Color,
-      (value) {
+      (value, callback) {
         /// refresh ui
         setState(() {
         });
@@ -353,7 +451,6 @@ Stateful(
 Through **FBroadcast**, partial status updates between UI interactions can be easily completed. The above example shows the color change. The data object has only one parameter. In the actual development process, the developer can enrich the communication data object as needed.
 
 Developer only need to **register the receiver** in the Widget that needs to update the UI, call `setState((){})` once to send a message at the interaction point. Instead of actively writing the trigger logic and `setState((){})` at all interaction points.
-
 
 ### 💻 Global state management
 
@@ -379,12 +476,12 @@ class _AvatarState extends State<Avatar> {
     FBroadcast.instance().register(
       Key_MsgCount,
       /// register Key_MsgCount reviver
-      (value) => setState(() {
+      (value, callback) => setState(() {
         msgCount = value;
       }),
       more: {
         /// register Key_User reviver
-        Key_User: (value) => setState(() {
+        Key_User: (value, callback) => setState(() {
           /// get value
           user = value;
         }),
@@ -528,10 +625,10 @@ class _LoginPageState extends State<LoginPage> {
           FBroadcast.instance().register(
             Key_Login,
             /// refresh ui
-            (value) => setState(() {}),
+            (value, callback) => setState(() {}),
             more: {
               /// register user receiver
-              Key_User: (value) {
+              Key_User: (value, callback) {
                 FLoading.hide();
                 Navigator.pop(context);
               },
@@ -599,7 +696,7 @@ The above example shows that through **FBroadcast**, **message transfer** can be
 /// [receiver] - receiver
 /// [context] - context. Not null, [receiver] will be registered in the environment.
 /// [more] - Make it easy to register multiple recipients at once
-FBroadcast register(String key, ValueCallback receiver, {Object context, Map<String, ValueCallback> more})
+FBroadcast register(String key, ResultCallback receiver, {Object context, Map<String, ResultCallback> more})
 ```
 
 ### 📌 Send Broadcast
@@ -612,8 +709,9 @@ FBroadcast register(String key, ValueCallback receiver, {Object context, Map<Str
 /// The receiver can get the data carried in this message through [value].
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
+/// [callback] - Able to receive the message returned by the receiver
 /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developer can use the [clear] function to remove persistent message types.
-void broadcast(String key, {dynamic value, bool persistence})
+void broadcast(String key, {dynamic value, ValueCallback callback, bool persistence})
 ```
 
 #### 🧲 Send Sticky Broadcast
@@ -626,8 +724,9 @@ void broadcast(String key, {dynamic value, bool persistence})
 ///
 /// [key] - Message type
 /// [value] - The data carried in the message. Can be any type or null.
+/// [callback] - Able to receive the message returned by the receiver
 /// [persistence] - Whether or not to persist message types. Persistent messages can be retrieved at any time by [FBroadcast. Value] for the current message packet. By default, unpersisted message types are removed without a receiver, while persisted message types are not. Developer can use the [clear] function to remove persistent message types.
-void stickyBroadcast(String key, {dynamic value, bool persistence})
+void stickyBroadcast(String key, {dynamic value, ValueCallback callback, bool persistence})
 ```
 
 ### 📌 Get the data packet of the specified message
@@ -645,7 +744,7 @@ static T value<T>(String key)
 /// [receiver] - receiver
 /// [key]-message type
 /// [context] - context.
-FBroadcast remove(ValueCallback receiver, {String key, Object context})
+FBroadcast remove(ResultCallback receiver, {String key, Object context})
 ```
 
 ### 📌 Remove the specified type of message
@@ -674,7 +773,6 @@ void unregister(Object context)
 /// Remove all receivers in the broadcasting system, and sticky broadcasting.
 void dispose()
 ```
-
 
 # 😃 How to use？
 

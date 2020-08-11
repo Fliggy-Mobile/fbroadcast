@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fbroadcast_example/broadcast_keys.dart';
 import 'package:fbroadcast_example/page_demo_1.dart';
 import 'package:fbroadcast_example/page_demo_2.dart';
+import 'package:fbroadcast_example/page_demo_3.dart';
 import 'package:fbutton/fbutton.dart';
 import 'package:fcommon/fcommon.dart';
 import 'package:floading/floading.dart';
@@ -10,7 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:fbroadcast/fbroadcast.dart';
 import 'package:ftoast/ftoast.dart';
 
+import 'location_server.dart';
+
 void main() {
+  LocationServer();
   runApp(MyApp());
 }
 
@@ -43,7 +47,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    FBroadcast.instance().register(Key_StopCount, (_) {
+    FBroadcast.instance().register(Key_StopCount, (_, __) {
       runAddCount?.cancel();
       setState(() {
         text = "STOP!";
@@ -106,6 +110,26 @@ class _HomePageState extends State<HomePage> {
                   },
                 ));
                 addCount(context);
+              },
+            ),
+            const SizedBox(height: 90),
+            FButton(
+              width: 200,
+              padding: EdgeInsets.only(top: 18.0, bottom: 18.0),
+              alignment: Alignment.center,
+              text: "Demo3: Location",
+              style: TextStyle(color: mainTextNormalColor),
+              color: mainBackgroundColor,
+              isSupportNeumorphism: true,
+              corner: FCorner.all(6.0),
+              onPressed: () {
+                FBroadcast.instance()
+                    .stickyBroadcast(Key_MsgCount, value: ++msgCount);
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) {
+                    return PageDemo3();
+                  },
+                ));
               },
             ),
           ],

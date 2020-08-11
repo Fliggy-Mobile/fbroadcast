@@ -81,7 +81,7 @@ class PageDemo2 extends StatelessWidget {
                               Key_User,
 
                               /// refresh ui
-                              (value) => setState(() {}),
+                              (value, _) => setState(() {}),
 
                               /// bind context
                               context: data,
@@ -109,7 +109,7 @@ class PageDemo2 extends StatelessWidget {
                                   /// register
                                   FBroadcast.instance().register(
                                     Key_Color,
-                                    (value) {
+                                    (value, _) {
                                       /// refresh ui
                                       setState(() {});
                                     },
@@ -211,10 +211,10 @@ class _AvatarState extends State<Avatar> {
       Key_MsgCount,
 
       /// register Key_MsgCount reviver
-      (value) => setState(() {}),
+      (value, _) => setState(() {}),
       more: {
         /// register Key_User reviver
-        Key_User: (value) => setState(() {}),
+        Key_User: (value, _) => setState(() {}),
       },
 
       /// bind context
