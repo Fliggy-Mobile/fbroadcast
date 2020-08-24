@@ -280,10 +280,10 @@ class FBroadcast {
         if (value.isEmpty) needRemove.add(k);
       });
       needRemove.forEach((k) {
-        print('needRemove = $k');
+//        print('needRemove = $k');
         _receiverCache.remove(k);
       });
-      print('size = ${_receiverCache.length}');
+//      print('size = ${_receiverCache.length}');
     }
     remove?.dispose();
     _stickyMap.remove(key);
@@ -330,7 +330,9 @@ class _Notifier<T> {
   _Notifier(
     value, {
     this.persistence = false,
-  });
+  }){
+    _value = value;
+  }
 
   bool _debugAssertNotDisposed() {
     assert(() {
