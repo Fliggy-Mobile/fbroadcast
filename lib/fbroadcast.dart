@@ -10,7 +10,7 @@ export 'package:fbroadcast/stateful.dart';
 /// At the same time, [FBroadcast] also supports sticky broadcasting, which will help developers easily handle some complex communication scenarios.
 class FBroadcast {
   Map<String, _Notifier<dynamic>> _map;
-  Map<String, dynamic> _stickyMap;
+  Map<String, List<_Notifier>> _stickyMap;
   Map<Object, List<ResultCallback>> _receiverCache;
 
   FBroadcast._() {
@@ -128,7 +128,10 @@ class FBroadcast {
     if (_map.containsKey(key) && _map[key].hasListeners) {
       broadcast(key, value: value, callback: callback);
     } else {
-      _stickyMap[key] = _Notifier(value)..callback = callback;
+      if (_stickyMap[key] == null) {
+        _stickyMap[key] = [];
+      }
+      _stickyMap[key].add(_Notifier(value)..callback = callback);
     }
   }
 
@@ -161,10 +164,13 @@ class FBroadcast {
       if (context != null && !_getReceivers(context).contains(receiver)) {
         _receiverCache[context].add(receiver);
       }
-      if (_stickyMap.containsKey(key)) {
-        _Notifier notifier = _stickyMap[key];
+      if (_stickyMap[key] != null) {
+        _stickyMap[key].forEach((element) {
+          _Notifier notifier = element;
+//          _stickyMap.remove(key);
+          broadcast(key, value: notifier.value, callback: notifier.callback);
+        });
         _stickyMap.remove(key);
-        broadcast(key, value: notifier.value, callback: notifier.callback);
       }
     }
     if (more?.isNotEmpty ?? false) {
@@ -173,10 +179,13 @@ class FBroadcast {
         if (context != null && !_getReceivers(context).contains(value)) {
           _receiverCache[context].add(value);
         }
-        if (_stickyMap.containsKey(key)) {
-          _Notifier notifier = _stickyMap[key];
+        if (_stickyMap[key] != null) {
+          _stickyMap[key].forEach((element) {
+            _Notifier notifier = element;
+//          _stickyMap.remove(key);
+            broadcast(key, value: notifier.value, callback: notifier.callback);
+          });
           _stickyMap.remove(key);
-          broadcast(key, value: notifier.value, callback: notifier.callback);
         }
       });
     }
@@ -330,7 +339,7 @@ class _Notifier<T> {
   _Notifier(
     value, {
     this.persistence = false,
-  }){
+  }) {
     _value = value;
   }
 
