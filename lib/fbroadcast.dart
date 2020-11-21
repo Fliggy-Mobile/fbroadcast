@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +11,7 @@ export 'package:fbroadcast/stateful.dart';
 /// [FBroadcast] Help developers build an efficient broadcast system in the application. Receivers registered in the system will be able to receive corresponding types of messages sent anywhere.
 /// At the same time, [FBroadcast] also supports sticky broadcasting, which will help developers easily handle some complex communication scenarios.
 class FBroadcast {
+  static bool debug = false;
   Map<String, _Notifier<dynamic>> _map;
   Map<String, List<_Notifier>> _stickyMap;
   Map<Object, List<ResultCallback>> _receiverCache;
@@ -80,18 +83,6 @@ class FBroadcast {
     if (persistence && !_get(key).persistence) {
       _get(key).persistence = true;
     }
-//    if (value == null || _get(key).value == value) {
-//      /// 为了避免在返回上一页面时，tree 还没解锁就调用 setState
-//      ///
-//      /// To avoid calling setState before the tree is unlocked when returning to the previous page
-//      Timer(Duration(milliseconds: 0), () {
-//        _get(key).notifyListeners();
-//      });
-//    } else {
-//      Timer(Duration(milliseconds: 0), () {
-//        _get(key).value = value;
-//      });
-//    }
     _get(key).callback = callback;
     if (value == null || _get(key).value == value) {
       _get(key).notifyListeners();
@@ -213,7 +204,7 @@ class FBroadcast {
         value.removeListener(receiver);
       });
     }
-    _checkMap();
+    _cleanMap();
     if (context != null) {
       _getReceivers(context).remove(receiver);
       if (_getReceivers(context).isEmpty) {
@@ -248,7 +239,7 @@ class FBroadcast {
           notifier.removeListener(listener);
         });
       }
-      _checkMap();
+      _cleanMap();
       _getReceivers(context).clear();
       _receiverCache.remove(context);
     }
@@ -257,7 +248,7 @@ class FBroadcast {
   /// 移除没有接收器，且不持久化的 [_Notifier]
   ///
   /// Removes a [Notifier] that does not have a receiver and is not persistent
-  void _checkMap() {
+  void _cleanMap() {
     if (_map == null) return;
     List<String> needRemove = [];
     _map.forEach((key, value) {
@@ -309,7 +300,28 @@ class FBroadcast {
     _map.clear();
     _receiverCache.clear();
     _stickyMap.clear();
-    _map = null;
+  }
+
+  void printFBroadcastInfo() {
+    if (debug) {
+      Map reciverInfos = {};
+      _map.forEach((key, value) {
+        int total = value._listeners?.length ?? 0;
+        int sticky = 0;
+        if (_stickyMap[key] != null) {
+          sticky = _stickyMap[key].length;
+        }
+        reciverInfos[key] = {
+          "total": total,
+          "sticky": sticky,
+        };
+      });
+      if (reciverInfos.isNotEmpty) {
+        _fdebugPrint("当前驻留系统的广播：${jsonEncode(reciverInfos)}");
+      } else {
+        _fdebugPrint("当前系统中无驻留广播");
+      }
+    }
   }
 }
 
@@ -388,9 +400,42 @@ class _Notifier<T> {
           if (_listeners.contains(listener)) listener(value, callback);
         } catch (exception) {}
       }
+      callback = null;
     }
   }
 
   @override
   String toString() => '${describeIdentity(this)}($value)';
+}
+
+_fdebugPrint(String msg, {String tag = "FBroadcast: "}) {
+  if (FBroadcast.debug) {
+    var dateTime = DateTime.now();
+    String r =
+        "[$dateTime(${dateTime.millisecondsSinceEpoch})] ${tag ?? ''} $msg";
+    if (r.length < 800) {
+      print(r);
+    } else {
+      _segmentationPrint(r);
+    }
+  }
+}
+
+void _segmentationPrint(String msg) {
+  print("------- split log start -------");
+  var outStr = StringBuffer();
+  for (var index = 0; index < msg.length; index++) {
+    outStr.write(msg[index]);
+    if (index % 800 == 0 && index != 0) {
+      print(outStr);
+      outStr.clear();
+      var lastIndex = index + 1;
+      if (msg.length - lastIndex < 800) {
+        var remainderStr = msg.substring(lastIndex, msg.length);
+        print(remainderStr);
+        break;
+      }
+    }
+  }
+  print("------- split log end -------");
 }
