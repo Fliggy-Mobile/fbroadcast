@@ -304,22 +304,35 @@ class FBroadcast {
 
   void printFBroadcastInfo() {
     if (debug) {
-      Map reciverInfos = {};
+      int total1 = 0;
+      Map reciverInfos1 = {};
       _map.forEach((key, value) {
-        int total = value._listeners?.length ?? 0;
-        int sticky = 0;
-        if (_stickyMap[key] != null) {
-          sticky = _stickyMap[key].length;
-        }
-        reciverInfos[key] = {
-          "total": total,
-          "sticky": sticky,
+        int count = value._listeners?.length ?? 0;
+        total1 += count;
+        reciverInfos1[key] = {
+          "count": count,
         };
       });
-      if (reciverInfos.isNotEmpty) {
-        _fdebugPrint("当前驻留系统的广播：${jsonEncode(reciverInfos)}");
-      } else {
+      int total2 = 0;
+      Map reciverInfos2 = {};
+      _stickyMap.forEach((key, value) {
+        int count = value.length ?? 0;
+        total2 += count;
+        reciverInfos2[key] = {
+          "count": count,
+        };
+      });
+      if (reciverInfos1.isEmpty && reciverInfos2.isEmpty) {
         _fdebugPrint("当前系统中无驻留广播");
+      } else {
+        if (reciverInfos1.isNotEmpty) {
+          _fdebugPrint(
+              "当前驻留系统的[普通广播]，共 $total1 条：${jsonEncode(reciverInfos1)}");
+        }
+        if (reciverInfos2.isNotEmpty) {
+          _fdebugPrint(
+              "当前驻留系统的[Sticky 广播]，共 $total2 条：${jsonEncode(reciverInfos2)}");
+        }
       }
     }
   }
