@@ -1,8 +1,10 @@
-## 1.0.3
+## 1.1.0
 
 - The 'printfbroadcastinfo()' function is provided to query the broadcast information in the current system to help developers clean up useless broadcasts in time
 
 - Avoid error callback calls in two-way communication
+
+- `FBroadcast.instance({dynamic context})` supports the incoming scope [context], and developers will be able to obtain a broadcasting system that is only valid within the scope.
 
 ## 1.0.2
 

@@ -12,23 +12,50 @@ export 'package:fbroadcast/stateful.dart';
 /// At the same time, [FBroadcast] also supports sticky broadcasting, which will help developers easily handle some complex communication scenarios.
 class FBroadcast {
   static bool debug = false;
+  static final Map<dynamic, FBroadcast> _broadcastMap = {};
   Map<String, _Notifier<dynamic>> _map;
   Map<String, List<_Notifier>> _stickyMap;
   Map<Object, List<ResultCallback>> _receiverCache;
+  String _type = "extra";
+  dynamic _key;
 
-  FBroadcast._() {
+  FBroadcast._({String type}) {
+    _type = type ?? "extra";
     _map = {};
     _stickyMap = {};
     _receiverCache = {};
   }
 
-  static FBroadcast _instance = FBroadcast._();
+  static FBroadcast _instance = FBroadcast._(type: "system");
 
   /// 获取 [FBroadcast] 系统实例，已进行注册/广播等操作
   ///
   /// Obtained [FBroadcast] system instance, registered/broadcast and other operations have been performed
-  static FBroadcast instance() {
-    return _instance;
+  ///
+  /// [context] 作用域环境。通过作用域环境获取到广播系统，其有效范围将会被限制在作用域范围内（即 context 环境中）。
+  ///           作用域内发送的广播，只能被作用域内注册的接收器所接收。而其它作用域将不受其影响，即使它们使用了相同的 Key。
+  ///           context 可以是任意类型的对象实例。
+  ///           通过 [FBroadcast.dispose] 可以释放一个广播系统。
+  ///           如果 [context] 为 null，将返回全局广播。
+  /// [context] Scope environment. The broadcast system is acquired through the scope environment, and its effective scope will be limited within the scope (ie in the context environment).
+  ///           Broadcasts sent within the scope can only be received by receivers registered in the scope. The other scopes will not be affected by it, even if they use the same Key.
+  ///           context can be any type of object instance.
+  ///           A broadcast system can be released through [FBroadcast.dispose].
+  ///           If [context] is null, global broadcast will be returned.
+  static FBroadcast instance([dynamic context]) {
+    if (context == null) {
+      return _instance;
+    } else {
+      if (_broadcastMap.containsKey(context) &&
+          _broadcastMap[context] != null) {
+        return _broadcastMap[context];
+      } else {
+        FBroadcast newObj = FBroadcast._();
+        newObj._key = context;
+        _broadcastMap[context] = newObj;
+        return newObj;
+      }
+    }
   }
 
   /// 接收者可以通过该函数获取消息中的数据
@@ -300,13 +327,26 @@ class FBroadcast {
     _map.clear();
     _receiverCache.clear();
     _stickyMap.clear();
+    if (_type == "extra" && _key != null) {
+      _broadcastMap.remove(_key);
+    }
   }
 
-  void printFBroadcastInfo() {
-    if (debug) {
+  /// 输出 FBroadcast 系统中的驻留广播信息
+  static void printFBroadcastInfo() {
+    if (FBroadcast.debug) {
+      _printFBroadcastInfo(fBroadcast: FBroadcast.instance());
+      FBroadcast._broadcastMap.forEach((key, value) {
+        _printFBroadcastInfo(context: key, fBroadcast: value);
+      });
+    }
+  }
+
+  static void _printFBroadcastInfo({dynamic context, FBroadcast fBroadcast}) {
+    if (fBroadcast != null) {
       int total1 = 0;
       Map reciverInfos1 = {};
-      _map.forEach((key, value) {
+      fBroadcast._map.forEach((key, value) {
         int count = value._listeners?.length ?? 0;
         total1 += count;
         reciverInfos1[key] = {
@@ -315,23 +355,24 @@ class FBroadcast {
       });
       int total2 = 0;
       Map reciverInfos2 = {};
-      _stickyMap.forEach((key, value) {
+      fBroadcast._stickyMap.forEach((key, value) {
         int count = value.length ?? 0;
         total2 += count;
         reciverInfos2[key] = {
           "count": count,
         };
       });
+      String tag = context == null ? "【系统级】" : "【${context.toString()}级】";
       if (reciverInfos1.isEmpty && reciverInfos2.isEmpty) {
-        _fdebugPrint("当前系统中无驻留广播");
+        _fdebugPrint("$tag当前系统中无驻留广播");
       } else {
         if (reciverInfos1.isNotEmpty) {
           _fdebugPrint(
-              "当前驻留系统的[普通广播]，共 $total1 条：${jsonEncode(reciverInfos1)}");
+              "$tag当前驻留系统的[普通广播]，共 $total1 条：${jsonEncode(reciverInfos1)}");
         }
         if (reciverInfos2.isNotEmpty) {
           _fdebugPrint(
-              "当前驻留系统的[Sticky 广播]，共 $total2 条：${jsonEncode(reciverInfos2)}");
+              "$tag当前驻留系统的[Sticky 广播]，共 $total2 条：${jsonEncode(reciverInfos2)}");
         }
       }
     }
