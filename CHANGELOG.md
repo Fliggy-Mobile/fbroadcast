@@ -6,6 +6,8 @@
 
 - `FBroadcast.instance({dynamic context})` supports the incoming scope [context], and developers will be able to obtain a broadcasting system that is only valid within the scope.
 
+- Support asynchronous registration by `FBroadcast.unregister(context, async: true)`
+
 ## 1.0.2
 
 - StickyBroadcast supports multiple messages of the same type in the broadcast system at the same time

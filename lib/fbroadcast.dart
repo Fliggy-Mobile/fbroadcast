@@ -258,7 +258,15 @@ class FBroadcast {
   /// For example, when the page is closed, the developer can use [unregister] to remove all recipients registered in the environment at once.
   /// Of course, the prerequisite is that when the receiver registers through [register], pass in [context] to register the receiver to the environment.
   /// [context] - context.
-  void unregister(Object context) {
+  void unregister(Object context, {bool async = false}) {
+    if (async) {
+      _unregisterAsync(context);
+    } else {
+      _unregister(context);
+    }
+  }
+
+  void _unregister(Object context) {
     if (_map == null) return;
     if (context != null) {
       for (ResultCallback listener in _getReceivers(context)) {
@@ -270,6 +278,26 @@ class FBroadcast {
       _getReceivers(context).clear();
       _receiverCache.remove(context);
     }
+  }
+
+  /// 异步解注册，防止注册过多导致解注册时卡顿
+  Future<bool> _unregisterAsync(Object context) async {
+    if (_map == null) return false;
+    if (context != null) {
+      List notifys = _map.values.toList();
+      for (ResultCallback listener in _getReceivers(context)) {
+        for (_Notifier notify in notifys) {
+          await Future.delayed(Duration(milliseconds: 0));
+          if (notify._listeners != null) {
+            notify.removeListener(listener);
+          }
+        }
+      }
+      _cleanMap();
+      _getReceivers(context).clear();
+      _receiverCache.remove(context);
+    }
+    return true;
   }
 
   /// 移除没有接收器，且不持久化的 [_Notifier]
@@ -321,9 +349,9 @@ class FBroadcast {
   /// Remove all receivers in the broadcasting system, and sticky broadcasting.
   void dispose() {
     if (_map == null) return;
-    _map.forEach((key, value) {
-      value.dispose();
-    });
+    // _map.forEach((key, value) {
+    //   value.dispose();
+    // });
     _map.clear();
     _receiverCache.clear();
     _stickyMap.clear();
