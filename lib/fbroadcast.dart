@@ -344,17 +344,10 @@ class FBroadcast {
     _stickyMap.remove(key);
   }
 
-  /// 会移除广播系统中的所有的接收者，以及粘性广播。
+  /// 会移除当前广播系统实例中的所有的数据。
   ///
-  /// Remove all receivers in the broadcasting system, and sticky broadcasting.
+  /// All data in the current broadcast system instance will be removed.
   void dispose() {
-    if (_map == null) return;
-    // _map.forEach((key, value) {
-    //   value.dispose();
-    // });
-    _map.clear();
-    _receiverCache.clear();
-    _stickyMap.clear();
     if (_type == "extra" && _key != null) {
       _broadcastMap.remove(_key);
     }

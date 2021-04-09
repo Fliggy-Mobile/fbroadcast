@@ -18,7 +18,7 @@
 <p>
 
 <a href="https://pub.dev/packages/fbroadcast#-readme-tab-">
-    <img height="20" src="https://img.shields.io/badge/Version-1.1.0-important.svg">
+    <img height="20" src="https://img.shields.io/badge/Version-1.1.1-important.svg">
 </a>
 
 

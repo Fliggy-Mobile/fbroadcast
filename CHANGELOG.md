@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Optimize the efficiency of removing broadcast system instances
+
 ## 1.1.0
 
 - The 'printfbroadcastinfo()' function is provided to query the broadcast information in the current system to help developers clean up useless broadcasts in time
