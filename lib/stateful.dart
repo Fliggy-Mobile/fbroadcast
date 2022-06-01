@@ -6,19 +6,18 @@ typedef StatefulBuilder = Widget Function(
     BuildContext context, StateSetter setState, Map data);
 
 class Stateful extends StatefulWidget {
-  final StatefulCallback initState;
-  final ValueCallback didUpdateWidget;
-  final ValueCallback dispose;
+  final StatefulCallback? initState;
+  final ValueCallback? didUpdateWidget;
+  final ValueCallback? dispose;
   final StatefulBuilder builder;
 
   Stateful({
-    Key key,
+    Key? key,
     this.initState,
     this.didUpdateWidget,
     this.dispose,
-    @required this.builder,
-  })  : assert(builder != null),
-        super(key: key);
+    required this.builder,
+  }) : super(key: key);
 
   @override
   _StatefulState createState() => _StatefulState();

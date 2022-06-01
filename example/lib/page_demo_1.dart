@@ -53,22 +53,6 @@ class PageDemo1 extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 100),
-              FButton(
-                width: 100,
-                height: 50,
-                text: "Start",
-                style: TextStyle(color: mainTextTitleColor),
-                alignment: Alignment.center,
-                color: mainBackgroundColor,
-                isSupportNeumorphism: true,
-                corner: FCorner.all(6.0),
-                onPressed: () {
-                  /// send run message
-                  FBroadcast.instance()
-                      .broadcast(Key_RunnerState, value: "Running...");
-                },
-              ),
             ],
           ),
         ),

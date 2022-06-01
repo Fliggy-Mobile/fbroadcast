@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:fbroadcast/fbroadcast.dart';
 import 'package:fbroadcast_example/broadcast_keys.dart';
 import 'package:fbroadcast_example/user.dart';
-import 'package:floading/floading.dart';
 
 class LoginHandler {
   String _userName;

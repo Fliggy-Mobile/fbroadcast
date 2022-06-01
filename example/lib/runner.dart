@@ -13,6 +13,7 @@ class Runner {
         run(20);
       }
     });
+    run(0);
   }
 
   run(double distance) {

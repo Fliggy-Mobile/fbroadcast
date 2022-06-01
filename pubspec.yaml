@@ -1,12 +1,12 @@
 name: fbroadcast
 description: FBroadcast Help developers build an efficient broadcast system in the application.
-version: 1.1.1
+version: 2.0.0
 author: CoorChice<coorchice.cb@alibaba-inc.com>
 homepage: https://github.com/Fliggy-Mobile/fbroadcast
 email: coorchice.cb@alibaba-inc.com
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.10.0"
 
 dependencies:

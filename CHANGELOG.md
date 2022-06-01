@@ -1,3 +1,6 @@
+## 2.0.0
+- Support null-safety
+
 ## 1.1.1
 
 - Optimize the efficiency of removing broadcast system instances
