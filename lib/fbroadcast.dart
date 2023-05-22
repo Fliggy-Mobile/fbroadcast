@@ -69,6 +69,20 @@ class FBroadcast {
     return value;
   }
 
+  /// 接收者可以通过该函数获取消息中的数据
+  ///
+  /// This function allows the receiver to get the data in the message
+  T? getValue<T>(String key) {
+    if (_textIsEmpty(key)) return null;
+    var value = _map[key]?.value;
+    if (value == null) return null;
+    if (!(value is T)) {
+      debugPrintStack(
+          label: 'Error: value type [${value.runtimeType}] is not [$T]');
+    }
+    return value;
+  }
+
   _Notifier _get(String key) {
     if (_textIsEmpty(key)) throw Exception("The key can't be null or empty!");
     if (!_map.containsKey(key)) {
@@ -120,7 +134,7 @@ class FBroadcast {
   /// [key] - 消息类型
   /// [value] - 消息携带的数据。可以是任意类型或是null。
   /// [callback] - 能够收到接收器返回的消息
-  /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [FBroadcast.value] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
+  /// [persistence] - 是否持久化消息类型。持久化的消息可以在任意时刻通过 [getValue] 获取当前消息的数据包。默认情况下，未持久化的消息类型在没有接收者的时候会被移除，而持久化的消息类型则不会。开发者可以通过 [clear] 函数来移除持久化的消息类型。
   ///
   /// Broadcast a sticky message of type [key].
   /// If there are unregistered receivers of this type in the broadcast system, this message will be stuck in the system. Once a recipient of this type is registered, this message will be sent to the recipient immediately.

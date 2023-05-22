@@ -1,5 +1,6 @@
-## 2.0.0
+## 1.2.0
 - Support null-safety
+- 增加 [getValue] 用于从 FBroadcast 实例中获取数据
 
 ## 1.1.1
 
