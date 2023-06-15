@@ -162,6 +162,40 @@ class FBroadcast {
     }
   }
 
+  /// 仅注册一个指定类型的接收者。新注册的会把之前注册的覆盖了。
+  /// 如果传入了 [context] 环境，该接收者将会被注册到环境中。环境可以是任意类型的对象，例如：页面、类..
+  /// 接收者通过 [value] 可以获取到本条消息携带的数据。
+  /// 当调用 [unregister] 时，该接收者即会被清除。
+  /// [key] - 消息类型
+  /// [receiver] - 接收者
+  /// [context] - 环境。不为null，[receiver] 将会被注册到环境中。
+  /// [more] - 方便一次注册多个接收者
+  ///
+  /// register only one recipient of the specified type. The old recipient will be recovered by the newest recipient.
+  /// If the [context] environment is passed in, the recipient will be registered in the environment. The environment can be any type of object, for example: page, class...
+  /// The receiver can get the data carried in this message through [value].
+  /// When [unregister] is called, the receiver will be cleared.
+  /// [key]-message type
+  /// [receiver] - receiver
+  /// [context] - context. Not null, [receiver] will be registered in the environment.
+  FBroadcast registerSingle(
+    String key,
+    ResultCallback receiver, {
+    Object? context,
+  }) {
+    if (_map == null || _textIsEmpty(key)) return this;
+    if (_get(key).hasListeners) {
+      _get(key).listeners?.forEach((element) {
+        if (_getReceivers(context).contains(element)) {
+          _receiverCache[context]!.remove(element);
+        }
+      });
+      _get(key)._listeners?.clear();
+    }
+    register(key, receiver, context: context);
+    return this;
+  }
+
   /// 注册指定类型的接收者。
   /// 如果传入了 [context] 环境，该接收者将会被注册到环境中。环境可以是任意类型的对象，例如：页面、类..
   /// 接收者通过 [value] 可以获取到本条消息携带的数据。

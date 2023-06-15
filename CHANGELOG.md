@@ -1,3 +1,6 @@
+## 1.3.0
+- 增加 [registerSingle] 以支持覆盖式的注册监听者
+
 ## 1.2.0
 - Support null-safety
 - 增加 [getValue] 用于从 FBroadcast 实例中获取数据
