@@ -1,5 +1,6 @@
 ## 1.3.1
--
+- [optimized] 非持久化广播，在通知完毕后，value 将被移除
+- [optimized] 对 FDataCenter 进行特定的兼容处理
 
 ## 1.3.0
 - 增加 [registerSingle] 以支持覆盖式的注册监听者
