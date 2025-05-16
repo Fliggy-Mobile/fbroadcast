@@ -10,7 +10,7 @@ export 'package:fbroadcast/stateful.dart';
 class FBroadcast {
   static bool debug = false;
   static final Map<dynamic, FBroadcast> _broadcastMap = {};
-  late Map<String, _Notifier<dynamic>> _map;
+  late Map<String, _Notifier> _map;
   late Map<String, List<_Notifier>> _stickyMap;
   late Map<Object?, List<ResultCallback>> _receiverCache;
   String _type = "extra";
@@ -116,7 +116,9 @@ class FBroadcast {
   void broadcast(String key,
       {dynamic value, ValueCallback? callback, bool persistence = false}) {
     if (_textIsEmpty(key)) return;
-    if (persistence && !_get(key).persistence) {
+    // 为了兼容 FDataCenter 逻辑
+    bool forcePersistence = ((key == "_valueKey_inner_keys") || _map.containsKey("_valueKey_inner_keys"));
+    if (forcePersistence || (persistence && !_get(key).persistence)) {
       _get(key).persistence = true;
     }
     _get(key).callback = callback;
@@ -444,17 +446,20 @@ bool _textIsEmpty(String? text) {
 typedef ValueCallback<T> = void Function(T value);
 typedef ResultCallback<T> = void Function(T value, ValueCallback? callback);
 
-class _Notifier<T> {
+class _Notifier {
   late bool persistence;
   ValueCallback? callback;
 
-  T get value => _value;
-  late T _value;
+  dynamic get value => _value;
+  late dynamic _value;
 
-  set value(T newValue) {
+  set value(newValue) {
     if (_value == newValue) return;
     _value = newValue;
     notifyListeners();
+    if (!persistence) {
+      _value = null;
+    }
   }
 
   ObserverList<ResultCallback>? _listeners = ObserverList<ResultCallback>();
